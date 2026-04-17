@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My First App</title>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@starfederation/datastar"></script>
+</head>
+<body>
+    <main id="app">
+        <h1>Ready to build!</h1>
+        <button data-on-click="@get('/interact')">
+            Ping the Go Server
+        </button>
+        <div id="response-box">Waiting for backend...</div>
+    </main>
+</body>
+</html>
