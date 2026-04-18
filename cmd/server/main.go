@@ -1,11 +1,11 @@
 package main
 
-import "d_assist/internal/auth"
-
 import (
+	"d_assist/internal/auth"
 	"fmt"
-	"github.com/starfederation/datastar-go/datastar"
 	"net/http"
+
+	"github.com/starfederation/datastar-go/datastar"
 )
 
 type user_creds struct {
@@ -16,16 +16,16 @@ type user_creds struct {
 }
 
 func main() {
-	frontend_server := http.FileServer(http.Dir("./static"))
+	frontend_server := http.FileServer(http.Dir("../../static"))
 	http.Handle("/", frontend_server)
 
 	//  init oauth
 	auth.Init_oauth()
 
-	// routes
-	http.HandleFunc("/google_login", auth.Google_login)
-
 	// Listen for the Datastar click event
+	http.HandleFunc("/google_login", auth.Google_login)
+	http.HandleFunc("/google_callback", auth.Google_callback)
+
 	http.HandleFunc("/interact", serve_interact)
 	http.HandleFunc("/validate", validate_login)
 
