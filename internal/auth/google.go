@@ -21,7 +21,7 @@ var auth_state state
 
 func Init_oauth() {
 	//load .env file
-	err := godotenv.Load("../../.env.local")
+	err := godotenv.Load("./.env.local")
 	if err != nil {
 		log.Fatal("Error: ", err)
 		return

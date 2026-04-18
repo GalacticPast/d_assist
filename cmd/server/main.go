@@ -16,7 +16,7 @@ type user_creds struct {
 }
 
 func main() {
-	frontend_server := http.FileServer(http.Dir("../../static"))
+	frontend_server := http.FileServer(http.Dir("./static"))
 	http.Handle("/", frontend_server)
 
 	//  init oauth
