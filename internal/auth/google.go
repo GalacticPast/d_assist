@@ -3,6 +3,7 @@ package auth
 import "d_assist/internal/db"
 
 import (
+	"encoding/json"
 	"github.com/joho/godotenv"
 	"github.com/starfederation/datastar-go/datastar"
 	"golang.org/x/oauth2"
@@ -58,10 +59,9 @@ func Google_callback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	googlecon := auth_state.google_login_conf
+	google_config := auth_state.google_login_conf
 
-	// 3. Exchange code for token
-	token, err := googlecon.Exchange(r.Context(), code)
+	token, err := google_config.Exchange(r.Context(), code)
 	if err != nil {
 		log.Printf("Code-Token Exchange Failed: %v\n", err)
 		http.Error(w, "Failed to exchange token", http.StatusInternalServerError)
@@ -75,19 +75,30 @@ func Google_callback(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to fetch user data", http.StatusInternalServerError)
 		return
 	}
-	// CRITICAL: Always close the response body!
 	defer resp.Body.Close()
 
-	userData, err := io.ReadAll(resp.Body)
+	google_user_data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Printf("JSON Parsing Failed: %v\n", err)
 		http.Error(w, "Failed to read user data", http.StatusInternalServerError)
 		return
 	}
 
-	user_data := db.User{
-		ID: userData.
+	user := db.User{}
+	err = json.Unmarshal(google_user_data, &user)
+	if err != nil {
+		log.Printf("JSON Parsing Failed: %v\n", err)
+		http.Error(w, "Failed to Unmarshal user data", http.StatusInternalServerError)
+		return
 	}
 
-	http.Redirect(w, r, "/dashboard", http.StatusFound)
+	//@todo: finish this
+	res := db.Check_if_user_exists(user)
+
+	if res == false {
+		http.Redirect(w, r, "/login", http.StatusNotFound)
+	} else {
+		http.Redirect(w, r, "/dashboard", http.StatusFound)
+	}
+
 }
