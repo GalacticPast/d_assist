@@ -1,24 +1,31 @@
 package main
 
+import "d_assist/internal/auth"
+
 import (
 	"fmt"
-	"net/http"
 	"github.com/starfederation/datastar-go/datastar"
+	"net/http"
 )
 
 type user_creds struct {
 	First_Name string `json: "user_first_name"`
-	Last_Name string `json: "user_last_name"`
-	Email string `json:"user_email"`
-	Password string `json:"user_password"`
+	Last_Name  string `json: "user_last_name"`
+	Email      string `json:"user_email"`
+	Password   string `json:"user_password"`
 }
 
 func main() {
 	frontend_server := http.FileServer(http.Dir("./static"))
 	http.Handle("/", frontend_server)
 
+	//  init oauth
+	auth.Init_oauth()
+
+	// routes
+	http.HandleFunc("/google_login", auth.Google_login)
+
 	// Listen for the Datastar click event
-	// routes 
 	http.HandleFunc("/interact", serve_interact)
 	http.HandleFunc("/validate", validate_login)
 
@@ -39,7 +46,7 @@ func validate_login(w http.ResponseWriter, r *http.Request) {
 
 	user_creds := &user_creds{}
 
-	if err := datastar.ReadSignals(r, signals); err != nil {
+	if err := datastar.ReadSignals(r, user_creds); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
