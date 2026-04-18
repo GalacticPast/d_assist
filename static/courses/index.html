@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Courses | College Assist</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="header-left">
+        <a href="/" class="brand-link">
+          <div class="brand-icon">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
+          <span class="brand-text">College Assist</span>
+        </a>
+        <nav class="main-nav">
+          <a href="/dashboard">Dashboard</a>
+          <a href="/courses" class="active">Courses</a>
+        </nav>
+      </div>
+      <div class="header-right">
+        <button class="btn btn-ghost">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          Sign Out
+        </button>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <div class="page-header">
+        <div class="page-title-group">
+          <h1>Your Courses</h1>
+          <p>Filter all of your automatically mapped events down by explicitly selecting their parent course.</p>
+        </div>
+      </div>
+
+      <div class="courses-container mt-4">
+        
+        <div class="tabs-wrapper">
+          <div class="tab-list">
+            <button class="tab-btn active">
+              <span class="color-dot" style="background-color: #3b82f6;"></span>
+              History of IT
+            </button>
+            <button class="tab-btn">
+              <span class="color-dot" style="background-color: #8b5cf6;"></span>
+              Intro to Biology
+            </button>
+            <button class="tab-btn">
+              <span class="color-dot" style="background-color: #10b981;"></span>
+              Calculus II
+            </button>
+          </div>
+        </div>
+
+        <div class="tab-content">
+          
+          <div class="course-header">
+            <h2>History of IT</h2>
+            <span class="badge badge-secondary">CS 101</span>
+          </div>
+
+          <div class="task-list">
+            
+            <div class="task-card">
+              <div class="task-header">
+                <div class="task-info">
+                  <h3>Short Written Assignment – Your Interest</h3>
+                  <p>Module: Imported Syllabus Course · Final Due: Aug 21</p>
+                </div>
+                <div class="task-actions">
+                  <button class="btn btn-primary btn-sm btn-rounded btn-block shadow-md">
+                    <svg class="icon mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"></path><path d="M9 13a4.5 4.5 0 0 0 3-4"></path><path d="M6.003 5.125A3 3 0 0 0 6.401 6.5"></path><path d="M3.477 10.896a4 4 0 0 1 .585-.396"></path><path d="M6 18a4 4 0 0 1-1.967-.516"></path><path d="M12 13h4"></path><path d="M12 18h6a2 2 0 0 1 2 2v1"></path><path d="M12 8h8"></path><path d="M16 8V5a2 2 0 0 1 2-2"></path><circle cx="16" cy="13" r=".5"></circle><circle cx="18" cy="3" r=".5"></circle><circle cx="20" cy="21" r=".5"></circle><circle cx="20" cy="8" r=".5"></circle></svg>
+                    Start Session
+                  </button>
+                  <button class="btn btn-outline btn-sm btn-rounded btn-block mt-2">
+                    <svg class="icon mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
+                    Email Reminder
+                  </button>
+                </div>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill" style="width: 16%;"></div>
+              </div>
+              <p class="progress-text">16% • High-score the Quiz to finish!</p>
+            </div>
+
+            <div class="task-card">
+              <div class="task-header">
+                <div class="task-info">
+                  <h3>Short Essay (Areas of Interest)</h3>
+                  <p>Module: Imported Syllabus Course · Final Due: Aug 28</p>
+                </div>
+                <div class="task-actions">
+                  <button class="btn btn-primary btn-sm btn-rounded btn-block shadow-md">
+                    <svg class="icon mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"></path></svg>
+                    Start Session
+                  </button>
+                  <button class="btn btn-outline btn-sm btn-rounded btn-block mt-2">
+                    <svg class="icon mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"></rect></svg>
+                    Email Reminder
+                  </button>
+                </div>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill" style="width: 4%;"></div>
+              </div>
+              <p class="progress-text">4% • High-score the Quiz to finish!</p>
+            </div>
+
+            <div class="task-card">
+              <div class="task-header">
+                <div class="task-info">
+                  <h3>Final Exam (PPTX with oral narrative)</h3>
+                  <p>Module: Imported Syllabus Course · Final Due: Oct 5</p>
+                </div>
+                <div class="task-actions-completed">
+                  <span class="badge badge-success-outline h-fit">Completed 100%</span>
+                </div>
+              </div>
+              <div class="progress-track bg-success-muted">
+                <div class="progress-fill bg-success" style="width: 100%;"></div>
+              </div>
+              <p class="progress-text text-success font-bold">Mastered (100%)</p>
+            </div>
+
+          </div>
+        </div>
+      </div>
+      
+    </main>
+  </div>
+</body>
+</html>
