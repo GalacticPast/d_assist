@@ -2,10 +2,11 @@ package main
 
 import (
 	"d_assist/internal/auth"
-	"fmt"
-	"net/http"
 
+	"fmt"
+	"github.com/joho/godotenv"
 	"github.com/starfederation/datastar-go/datastar"
+	"net/http"
 )
 
 type user_creds struct {
@@ -16,15 +17,14 @@ type user_creds struct {
 }
 
 func main() {
-	frontend_server := http.FileServer(http.Dir("./static"))
+	frontend_server := http.FileServer(http.Dir("../../static"))
 	http.Handle("/", frontend_server)
-
-	//  init oauth
-	auth.Init_oauth()
+	// load env variables
+	godotenv.Load("../../.env.local")
 
 	// Listen for the Datastar click event
-	http.HandleFunc("/google_login", auth.Google_login)
-	http.HandleFunc("/google_callback", auth.Google_callback)
+	http.HandleFunc("/google_signin", auth.Google_signin)
+	http.HandleFunc("/callback", auth.Callback)
 
 	http.HandleFunc("/interact", serve_interact)
 	http.HandleFunc("/validate", validate_login)
@@ -43,7 +43,7 @@ func serve_interact(w http.ResponseWriter, r *http.Request) {
 }
 
 func validate_login(w http.ResponseWriter, r *http.Request) {
-
+	fmt.Println("why is this executing? ")
 	user_creds := &user_creds{}
 
 	if err := datastar.ReadSignals(r, user_creds); err != nil {
