@@ -17,10 +17,10 @@ type user_creds struct {
 }
 
 func main() {
-	frontend_server := http.FileServer(http.Dir("../../static"))
+	frontend_server := http.FileServer(http.Dir("./static"))
 	http.Handle("/", frontend_server)
 	// load env variables
-	godotenv.Load("../../.env.local")
+	godotenv.Load(".env.local")
 
 	// Listen for the Datastar click event
 	http.HandleFunc("/google_signin", auth.Google_signin)
