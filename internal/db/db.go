@@ -1,10 +1,11 @@
 package db
 
 import (
+	"context"
+	"github.com/jackc/pgx/v5"
 	"github.com/supabase-community/gotrue-go/types"
 	"github.com/supabase-community/supabase-go"
 	"log"
-	"net/http"
 	"os"
 )
 
@@ -15,15 +16,15 @@ const (
 	SUPABASE_ADMIN_CLIENT  // 1
 )
 
-type User struct {
-	Id    string `json:"id"`
+type User_info struct {
+	ID    string `json:"id"`
 	Email string `json:"email"`
 	Name  string `json:"name"`
 }
 
 // @todo: hmmm how to make this one time only, cause for the duration of this app this should only create 2 clients.
 // we should just be reusing it right?
-func create_supabase_client(client_type supabase_client_type) (*supabase.Client, error) {
+func Create_supabase_client(client_type supabase_client_type) (*supabase.Client, error) {
 
 	supabase_pub_url := os.Getenv("NEXT_PUBLIC_SUPABASE_URL")
 
@@ -47,8 +48,26 @@ func create_supabase_client(client_type supabase_client_type) (*supabase.Client,
 	return client, nil
 }
 
+func Exchange_code(code string) types.Session {
+	supabase_client, err := Create_supabase_client(SUPABASE_PUBLIC_CLIENT)
+	if err != nil {
+
+	}
+
+	token_response, err := supabase_client.Auth.Token(types.TokenRequest{
+		GrantType: "pcke",
+		Code:      code,
+	})
+
+	if err != nil {
+		log.Fatalf("Couldnt authorize user.")
+	}
+
+	return token_response.Session
+}
+
 func Signin_via_oauth(provider string) string {
-	sb_client, err := create_supabase_client(SUPABASE_PUBLIC_CLIENT)
+	sb_client, err := Create_supabase_client(SUPABASE_PUBLIC_CLIENT)
 	if err != nil {
 		return ""
 	}
@@ -66,11 +85,47 @@ func Signin_via_oauth(provider string) string {
 	return res.AuthorizationURL
 }
 
-func signin_callback(w http.ResponseWriter, r *http.Request) {
-	log.Println("Google auth callback susssfullly!!!!")
+func Check_if_user_exists(user_data *User_info) bool {
+	// @todo: have a connection pool
+	conn, err := pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
+	if err != nil {
+		log.Fatalf("Failed to connect to the database: %v", err)
+	}
+	defer conn.Close(context.Background())
+
+	// Example query to test connection
+	// 1. Use $1 as the placeholder for your variable
+	query := "SELECT EXISTS(SELECT 1 FROM profiles WHERE id = $1)"
+
+	// 2. Pass the variable as a separate argument to QueryRow
+	var exists bool
+	err = conn.QueryRow(context.Background(), query, user_data.ID).Scan(&exists)
+
+	if err != nil {
+		// Handle the database error (e.g., connection lost)
+		log.Fatalf("Query failed: %v\n", err)
+	}
+	if exists {
+		return true
+	}
+	return false
 }
 
-func Check_if_user_exists(user_data User) bool {
+func Create_user(user_data *User_info) bool {
+	// @todo: have a connection pool
+	conn, err := pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
+	if err != nil {
+		log.Fatalf("Failed to connect to the database: %v", err)
+	}
+	defer conn.Close(context.Background())
 
-	return false
+	query := "INSERT INTO profiles (id, name, email) VALUES (@id, @name, @email)"
+	args := pgx.NamedArgs{"id": user_data.ID, "name": user_data.Name, "email": user_data.Email}
+	_, err = conn.Exec(context.Background(), query, args)
+
+	if err != nil {
+		log.Fatalf("Failed to insert query\n")
+		return false
+	}
+	return true
 }

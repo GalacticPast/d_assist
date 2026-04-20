@@ -2,10 +2,10 @@ package main
 
 import (
 	"d_assist/internal/auth"
-
 	"fmt"
 	"github.com/joho/godotenv"
 	"github.com/starfederation/datastar-go/datastar"
+	"log"
 	"net/http"
 )
 
@@ -17,14 +17,21 @@ type user_creds struct {
 }
 
 func main() {
-	frontend_server := http.FileServer(http.Dir("./static"))
+	err := godotenv.Load("../../.env.local")
+	if err != nil {
+		log.Fatal("Couldn't load env variables: ", err)
+		return
+	}
+	// init oauth
+	auth.Init_oauth()
+
+	frontend_server := http.FileServer(http.Dir("../../static"))
 	http.Handle("/", frontend_server)
-	// load env variables
-	godotenv.Load(".env.local")
 
 	// Listen for the Datastar click event
-	http.HandleFunc("/google_signin", auth.Google_signin)
-	http.HandleFunc("/callback", auth.Callback)
+	http.HandleFunc("/auth/google_signup", auth.Google_signup)
+	http.HandleFunc("/auth/google_signin", auth.Google_signin)
+	http.HandleFunc("/auth/google_callback", auth.Google_callback)
 
 	http.HandleFunc("/interact", serve_interact)
 	http.HandleFunc("/validate", validate_login)
