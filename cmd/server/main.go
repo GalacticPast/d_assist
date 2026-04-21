@@ -2,6 +2,7 @@ package main
 
 import (
 	"d_assist/internal/auth"
+	"d_assist/internal/dashboard"
 	"fmt"
 	"github.com/joho/godotenv"
 	"github.com/starfederation/datastar-go/datastar"
@@ -17,7 +18,7 @@ type user_creds struct {
 }
 
 func main() {
-	err := godotenv.Load("../../.env.local")
+	err := godotenv.Load(".env.local")
 	if err != nil {
 		log.Fatal("Couldn't load env variables: ", err)
 		return
@@ -25,37 +26,38 @@ func main() {
 	// init oauth
 	auth.Init_oauth()
 
-	frontend_server := http.FileServer(http.Dir("../../static"))
+	frontend_server := http.FileServer(http.Dir("./static"))
 	http.Handle("/", frontend_server)
 
 	// Listen for the Datastar click event
+	http.HandleFunc("/loading", loading_page)
+
+	// auth specific routers
+
 	http.HandleFunc("/auth/google_signup", auth.Google_signup)
 	http.HandleFunc("/auth/google_signin", auth.Google_signin)
 	http.HandleFunc("/auth/google_callback", auth.Google_callback)
 
-	http.HandleFunc("/interact", serve_interact)
-	http.HandleFunc("/validate", validate_login)
+	http.HandleFunc("/dashboard_setup", dashboard.Setup)
 
 	fmt.Println("Server booting up on http://localhost:8080")
 	http.ListenAndServe(":8080", nil)
 }
 
-func serve_interact(w http.ResponseWriter, r *http.Request) {
+func loading_page(w http.ResponseWriter, r *http.Request) {
 	sse := datastar.NewSSE(w, r)
 
-	// Patches elements into the DOM.
-	sse.PatchElements(
-		`<div id="response-box">The Go backend says hello!</div>`,
-	)
-}
-
-func validate_login(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("why is this executing? ")
-	user_creds := &user_creds{}
-
-	if err := datastar.ReadSignals(r, user_creds); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	cookie := r.CookiesNamed("d_assist")
+	if len(cookie) == 0 {
+		fmt.Print("No cookie found")
+		sse.Redirect("/homepage")
 		return
 	}
+	res := auth.Verify_cookie(cookie[0])
 
+	if res == true {
+		sse.Redirect("/dashboard")
+	} else {
+		sse.Redirect("/homepage")
+	}
 }

@@ -2,11 +2,14 @@ package db
 
 import (
 	"context"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/jackc/pgx/v5"
 	"github.com/supabase-community/gotrue-go/types"
 	"github.com/supabase-community/supabase-go"
 	"log"
 	"os"
+	"runtime"
+	"time"
 )
 
 type supabase_client_type int
@@ -93,22 +96,41 @@ func Check_if_user_exists(user_data *User_info) bool {
 	}
 	defer conn.Close(context.Background())
 
-	// Example query to test connection
-	// 1. Use $1 as the placeholder for your variable
 	query := "SELECT EXISTS(SELECT 1 FROM profiles WHERE id = $1)"
 
-	// 2. Pass the variable as a separate argument to QueryRow
 	var exists bool
 	err = conn.QueryRow(context.Background(), query, user_data.ID).Scan(&exists)
 
 	if err != nil {
-		// Handle the database error (e.g., connection lost)
 		log.Fatalf("Query failed: %v\n", err)
+		runtime.Breakpoint()
 	}
 	if exists {
 		return true
 	}
 	return false
+}
+
+func Get_JWT_Token(user_info *User_info) (string, error) {
+
+	claims := jwt.MapClaims{
+		"role":  "authenticated", // Tells Supabase this is a logged-in user
+		"sub":   user_info.ID,    // The unique ID. Supabase auth.uid() will equal this value!
+		"email": user_info.Email,
+		"aud":   "authenticated",
+		"iat":   time.Now().Unix(),
+		"exp":   time.Now().Add(time.Hour * 24).Unix(), // Token expires in 24 hours
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	// Sign the token using your Supabase JWT Secret
+	signedToken, err := token.SignedString([]byte(os.Getenv("SUPABASE_JWT_KEY")))
+	if err != nil {
+		return "", err
+	}
+
+	return signedToken, nil
 }
 
 func Create_user(user_data *User_info) bool {

@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 )
 
 type auth_config struct {
@@ -164,10 +165,28 @@ func Google_callback(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("json Unmarshal failed: %v\n", err)
 	}
-	// we check it anyways
 
+	// we check it anyways
 	if auth_state == "google_signin" {
 		res := db.Check_if_user_exists(&user_info)
+
+		signed_jwt_token, err := db.Get_JWT_Token(&user_info)
+
+		if err != nil {
+			log.Fatalf("Couldn't generate jwt token. %v\n", err)
+		}
+
+		auth_cookie := &http.Cookie{
+			Name:     "d_assist",
+			Value:    signed_jwt_token,
+			Path:     "/",
+			Expires:  time.Now().Add(24 * time.Hour), // Must match your JWT expiration
+			HttpOnly: true,                           // Crucial: Prevents JavaScript from reading the cookie
+			Secure:   false,                          // Crucial: Only sends cookie over HTTPS (set to false ONLY on localhost)
+			SameSite: http.SameSiteLaxMode,
+		}
+		http.SetCookie(w, auth_cookie)
+
 		if res == true {
 			http.Redirect(w, r, "/dashboard", http.StatusFound)
 		} else {
@@ -183,4 +202,8 @@ func Google_callback(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+}
+
+func Verify_cookie(cookie *http.Cookie) bool {
+	return true
 }
