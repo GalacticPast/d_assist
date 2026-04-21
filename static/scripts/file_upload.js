@@ -54,18 +54,4 @@ function handleUpload(file) {
 
   const formData = new FormData();
   formData.append("syllabus", file);
-
-  fetch("/upload", {
-    method: "POST",
-    body: formData,
-  })
-    .then((response) => response.text())
-    .then((data) => {
-      statusText.innerText = "Upload Complete!";
-      console.log(data);
-    })
-    .catch((error) => {
-      statusText.innerText = "Upload failed.";
-      console.error(error);
-    });
 }
