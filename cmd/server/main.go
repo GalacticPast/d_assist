@@ -26,34 +26,32 @@ func main() {
 	// init oauth
 	auth.Init_oauth()
 
-	frontend_server := http.FileServer(http.Dir("../../static"))
-	http.Handle("/", frontend_server)
-
 	// Listen for the Datastar click event
+	static_files := http.Dir("../../static")
+	fs := http.FileServer(static_files)
+	http.Handle("/", http.FileServer(static_files))
+	http.Handle("/static/", http.StripPrefix("/static/", fs))
+
 	http.HandleFunc("/loading", loading_page)
+	http.HandleFunc("/dashboard/", dashboard.Serve)
 
 	// auth specific routers
-
 	http.HandleFunc("/auth/google_signup", auth.Google_signup)
 	http.HandleFunc("/auth/google_signin", auth.Google_signin)
 	http.HandleFunc("/auth/google_callback", auth.Google_callback)
 
-	http.HandleFunc("/dashboard_setup", dashboard.Setup)
-
 	fmt.Println("Server booting up on http://localhost:8080")
 	http.ListenAndServe(":8080", nil)
+
 }
 
 func loading_page(w http.ResponseWriter, r *http.Request) {
-	sse := datastar.NewSSE(w, r)
-
 	res, _ := auth.Verify_cookie_and_get_claims(r)
 
-	// @info: this means the cookie was invalid? Refresh the cookie?
-	if res == false {
+	sse := datastar.NewSSE(w, r)
+	if res {
+		sse.Redirect("/dashboard")
+	} else {
 		sse.Redirect("/homepage")
-		return
 	}
-	// @fix: an extra trip??
-	sse.Redirect("/dashboard")
 }

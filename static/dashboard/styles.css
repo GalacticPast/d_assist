@@ -68,6 +68,7 @@ a {
   width: 100%;
 }
 
+
 /* --- Header --- */
 .app-header {
   position: sticky;
@@ -196,6 +197,88 @@ a {
 .icon-warning { color: var(--warning); }
 .icon-success { color: var(--success); }
 .icon-neutral { color: var(--accent); } /* Used accent purple here */
+
+/* -- for when there is nothing to show */
+
+.empty-courses{
+    text-align: center;
+    font-size: 3rem;
+    line-height: 1.1;
+    margin-bottom: 24px;
+    font-weight: 700; 
+}
+.text-gradient { 
+    background: linear-gradient(to right, var(--primary), var(--accent), var(--primary)); 
+    -webkit-background-clip: text;
+    color: transparent; 
+}
+.container {
+    width: 100%;
+    max-width: 760px;
+    padding: 40px 20px;
+}
+
+#dropzone {
+    background-color: #121318;
+    border: 1px dashed #2b2d35;
+    border-radius: 16px;
+    padding: 70px 20px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+    color: #ffffff; /* Added so you can see the text */
+}
+
+#dropzone:hover {
+    border-color: #4a4d5a;
+    background-color: #16181e;
+    cursor: pointer;
+}
+
+#icon-container {
+    background-color: #1d1f27;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 24px;
+    color: #8b8e98;
+}
+
+#dropzone h2 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    letter-spacing: -0.3px;
+    color: #ffffff;
+}
+
+#dropzone p {
+    color: #8b8e98;
+    font-size: 15px;
+    margin-bottom: 32px;
+}
+
+.select-btn {
+    background-color: transparent;
+    color: #ffffff;
+    border: 1px solid #2b2d35;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.select-btn:hover {
+    background-color: #1d1f27;
+    border-color: #4a4d5a;
+}
 
 /* --- Dashboard Grid --- */
 .dashboard-grid {
