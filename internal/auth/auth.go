@@ -8,12 +8,15 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/starfederation/datastar-go/datastar"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"log"
 	"net/http"
 	"os"
+	"runtime"
 	"strings"
 	"time"
 )
@@ -204,6 +207,41 @@ func Google_callback(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func Verify_cookie(cookie *http.Cookie) bool {
-	return true
+func Verify_cookie_and_get_claims(r *http.Request) (bool, jwt.Claims) {
+	named_cookie := r.CookiesNamed("d_assist")
+	if len(named_cookie) == 0 {
+		return false, nil
+	}
+
+	tokenString := named_cookie[0].Value
+
+	// 3. Parse and validate the token (Same as before)
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		// checking if the header of the algo is HMAC
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method")
+		}
+		return []byte(os.Getenv("SUPABASE_JWT_KEY")), nil
+	})
+	if err != nil || !token.Valid {
+		return false, nil
+	}
+	claims := token.Claims.(jwt.MapClaims)
+	exp_time, err := claims.GetExpirationTime()
+
+	if err != nil {
+		log.Fatal("What the hell, cookie exp time was not set")
+		runtime.Breakpoint()
+	}
+
+	if time.Now().After(exp_time.Time) {
+		return false, nil
+	}
+
+	return true, claims
+}
+
+func Get_user_id_from_claims(claims *jwt.Claims) string {
+	id, _ := (*claims).GetSubject()
+	return id
 }

@@ -151,3 +151,25 @@ func Create_user(user_data *User_info) bool {
 	}
 	return true
 }
+
+func Get_number_of_courses(user_id string) int {
+	conn, err := pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
+	if err != nil {
+		log.Fatalf("Failed to connect to the database: %v", err)
+		runtime.Breakpoint()
+	}
+	defer conn.Close(context.Background())
+
+	query := "SELECT COUNT(*) FROM courses WHERE user_id = (@user_id)"
+
+	args := pgx.NamedArgs{"user_id": user_id}
+
+	var count int
+	err = conn.QueryRow(context.Background(), query, args).Scan(&count)
+
+	if err != nil {
+		log.Fatalf("Failed to count courses: %v", err)
+		return 0
+	}
+	return count
+}

@@ -18,7 +18,7 @@ type user_creds struct {
 }
 
 func main() {
-	err := godotenv.Load(".env.local")
+	err := godotenv.Load("../../.env.local")
 	if err != nil {
 		log.Fatal("Couldn't load env variables: ", err)
 		return
@@ -26,7 +26,7 @@ func main() {
 	// init oauth
 	auth.Init_oauth()
 
-	frontend_server := http.FileServer(http.Dir("./static"))
+	frontend_server := http.FileServer(http.Dir("../../static"))
 	http.Handle("/", frontend_server)
 
 	// Listen for the Datastar click event
@@ -47,17 +47,13 @@ func main() {
 func loading_page(w http.ResponseWriter, r *http.Request) {
 	sse := datastar.NewSSE(w, r)
 
-	cookie := r.CookiesNamed("d_assist")
-	if len(cookie) == 0 {
-		fmt.Print("No cookie found")
+	res, _ := auth.Verify_cookie_and_get_claims(r)
+
+	// @info: this means the cookie was invalid? Refresh the cookie?
+	if res == false {
 		sse.Redirect("/homepage")
 		return
 	}
-	res := auth.Verify_cookie(cookie[0])
-
-	if res == true {
-		sse.Redirect("/dashboard")
-	} else {
-		sse.Redirect("/homepage")
-	}
+	// @fix: an extra trip??
+	sse.Redirect("/dashboard")
 }
