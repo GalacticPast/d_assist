@@ -183,9 +183,9 @@ func Google_callback(w http.ResponseWriter, r *http.Request) {
 			Name:     "d_assist",
 			Value:    signed_jwt_token,
 			Path:     "/",
-			Expires:  time.Now().Add(24 * time.Hour), // Must match your JWT expiration
-			HttpOnly: true,                           // Crucial: Prevents JavaScript from reading the cookie
-			Secure:   false,                          // Crucial: Only sends cookie over HTTPS (set to false ONLY on localhost)
+			Expires:  time.Now().Add(24 * time.Hour),
+			HttpOnly: false,
+			Secure:   false, // @info: Only sends cookie over HTTPS (set to false ONLY on localhost)
 			SameSite: http.SameSiteLaxMode,
 		}
 		http.SetCookie(w, auth_cookie)

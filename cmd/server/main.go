@@ -18,7 +18,7 @@ type user_creds struct {
 }
 
 func main() {
-	err := godotenv.Load("../../.env.local")
+	err := godotenv.Load(".env.local")
 	if err != nil {
 		log.Fatal("Couldn't load env variables: ", err)
 		return
@@ -27,7 +27,7 @@ func main() {
 	auth.Init_oauth()
 
 	// Listen for the Datastar click event
-	static_files := http.Dir("../../static")
+	static_files := http.Dir("./static")
 	fs := http.FileServer(static_files)
 	http.Handle("/", http.FileServer(static_files))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
@@ -42,7 +42,6 @@ func main() {
 
 	fmt.Println("Server booting up on http://localhost:8080")
 	http.ListenAndServe(":8080", nil)
-
 }
 
 func loading_page(w http.ResponseWriter, r *http.Request) {

@@ -41,17 +41,46 @@ dropzone.addEventListener("drop", (e) => {
 
 // Handle selected files
 fileInput.onchange = (e) => {
-  handleUpload(e.target.files[0]);
+  const files = fileInput.files;
+  handleUpload(files[0]);
 };
-
-function handleUpload(file) {
+// Add 'async' here
+async function handleUpload(file) {
   if (!file || file.type !== "application/pdf") {
     alert("Please upload a PDF file.");
     return;
   }
 
-  statusText.innerText = `Uploading: ${file.name}...`;
-
   const formData = new FormData();
   formData.append("syllabus", file);
+
+  const { createClient } = supabase;
+  const cookie = await cookieStore.get("d_assist");
+
+  // 2. Extract the .value
+  const token = cookie ? cookie.value : null;
+  const supabaseClient = createClient(
+    "https://wtpfmvqjwzkwtsvswtmm.supabase.co",
+    "sb_publishable_2KZxpcTep54b22QU9jN6Xg_w6v3Erhj",
+    {
+      accessToken: async () => {
+        return token;
+      },
+    },
+  );
+
+  try {
+    // 1. Upload to Supabase bucket
+    const filePath = `${file.name}`;
+    // Now 'await' will work perfectly
+    const { data: uploadData, error: uploadError } =
+      await supabaseClient.storage.from("syllabus_pdf").upload(filePath, file);
+
+    if (uploadError) {
+      throw new Error(`Upload Failed: ${uploadError.message}`);
+    }
+  } catch (err) {
+    console.error(err);
+    alert(`Error: ${err.message}`);
+  }
 }

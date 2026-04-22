@@ -117,13 +117,14 @@ func Get_JWT_Token(user_info *User_info) (string, error) {
 		"role":  "authenticated", // Tells Supabase this is a logged-in user
 		"sub":   user_info.ID,    // The unique ID. Supabase auth.uid() will equal this value!
 		"email": user_info.Email,
+		"iss":   "https://wtpfmvqjwzkwtsvswtmm.supabase.co/auth/v1",
 		"aud":   "authenticated",
 		"iat":   time.Now().Unix(),
 		"exp":   time.Now().Add(time.Hour * 24).Unix(), // Token expires in 24 hours
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
+	token.Header["kid"] = "1ab49d83-51e2-4967-86db-6f2da1309f90"
 	// Sign the token using your Supabase JWT Secret
 	signedToken, err := token.SignedString([]byte(os.Getenv("SUPABASE_JWT_KEY")))
 	if err != nil {
