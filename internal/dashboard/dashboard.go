@@ -12,7 +12,7 @@ import (
 )
 
 func Process_upload(w http.ResponseWriter, r *http.Request) {
-	res, _ := auth.Verify_cookie_and_get_claims(r)
+	res, _ := auth.Get_claims_from_cookie(r)
 	if res == false {
 		// should we redirect??
 		// imma just crash for now
@@ -28,7 +28,7 @@ func Upload_finished(w http.ResponseWriter, r *http.Request) {
 }
 
 func Serve(w http.ResponseWriter, r *http.Request) {
-	res, claims := auth.Verify_cookie_and_get_claims(r)
+	res, claims := auth.Get_claims_from_cookie(r)
 	// cookie expired ??
 	if res == false {
 		// should we redirect??

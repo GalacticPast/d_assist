@@ -208,7 +208,41 @@ func Google_callback(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func Verify_cookie_and_get_claims(r *http.Request) (bool, jwt.Claims) {
+func Verify_cookie(r *http.Request) (bool, error) {
+	named_cookie := r.CookiesNamed("d_assist")
+	if len(named_cookie) == 0 {
+		return false, errors.New("Couldn't find d_assist cookie")
+	}
+
+	tokenString := named_cookie[0].Value
+
+	// 3. Parse and validate the token (Same as before)
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		// checking if the header of the algo is HMAC
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("unexpected signing method")
+		}
+		return []byte(os.Getenv("SUPABASE_JWT_KEY")), nil
+	})
+	if err != nil || !token.Valid {
+		return false, errors.New("Token is not valid")
+	}
+	claims := token.Claims.(jwt.MapClaims)
+	exp_time, err := claims.GetExpirationTime()
+
+	if err != nil {
+		log.Fatal("What the hell, cookie exp time was not set")
+		runtime.Breakpoint()
+	}
+
+	if time.Now().After(exp_time.Time) {
+		return false, errors.New("Token expired")
+	}
+
+	return true, nil
+}
+
+func Get_claims_from_cookie(r *http.Request) (bool, jwt.Claims) {
 	named_cookie := r.CookiesNamed("d_assist")
 	if len(named_cookie) == 0 {
 		return false, nil
@@ -253,7 +287,7 @@ type Signed_url struct {
 }
 
 func Get_signed_upload_url(w http.ResponseWriter, r *http.Request) {
-	res, _ := Verify_cookie_and_get_claims(r)
+	res, _ := Get_claims_from_cookie(r)
 
 	if res {
 		file_path := r.FormValue("file_path")

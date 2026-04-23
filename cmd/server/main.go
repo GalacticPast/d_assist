@@ -1,6 +1,7 @@
 package main
 
 import (
+	"d_assist/internal"
 	"d_assist/internal/auth"
 	"d_assist/internal/dashboard"
 	"fmt"
@@ -33,25 +34,27 @@ func main() {
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 
 	// page specific
-	http.HandleFunc("/loading", loading_page)
-	http.HandleFunc("/dashboard/", dashboard.Serve)
+	http.Handle("/loading", internal.Verify_cookie(http.HandlerFunc(loading_page)))
+	http.Handle("/dashboard/", internal.Verify_cookie(http.HandlerFunc(dashboard.Serve)))
 
 	// auth specific routers
+	// auth doesnt need to go through the verify_Cookie handler
+	// but there might be different middleware handlers
 	http.HandleFunc("/auth/google_signup", auth.Google_signup)
 	http.HandleFunc("/auth/google_signin", auth.Google_signin)
 	http.HandleFunc("/auth/google_callback", auth.Google_callback)
 
 	// file upload specific
-	http.HandleFunc("/process_upload", dashboard.Process_upload)
-	http.HandleFunc("/upload", auth.Get_signed_upload_url)
-	http.HandleFunc("/upload_finished", dashboard.Upload_finished)
+	http.Handle("/process_upload", internal.Verify_cookie(http.HandlerFunc(dashboard.Process_upload)))
+	http.Handle("/upload", internal.Verify_cookie(http.HandlerFunc(auth.Get_signed_upload_url)))
+	http.Handle("/upload_finished", internal.Verify_cookie(http.HandlerFunc(dashboard.Upload_finished)))
 
 	fmt.Println("Server booting up on http://localhost:8080")
 	http.ListenAndServe(":8080", nil)
 }
 
 func loading_page(w http.ResponseWriter, r *http.Request) {
-	res, _ := auth.Verify_cookie_and_get_claims(r)
+	res, _ := auth.Get_claims_from_cookie(r)
 
 	sse := datastar.NewSSE(w, r)
 	if res {
