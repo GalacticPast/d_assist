@@ -174,3 +174,20 @@ func Get_number_of_courses(user_id string) int {
 	}
 	return count
 }
+
+var bucket_name = "syllabus_pdf"
+
+func Get_signed_upload_url(file_path string) string {
+	supabase_client, err := Create_supabase_client(SUPABASE_ADMIN_CLIENT)
+	if err != nil {
+		log.Printf("Failed to initalize the client: %v\n", err)
+		return ""
+	}
+	resp, err := supabase_client.Storage.CreateSignedUploadUrl(bucket_name, file_path)
+	if err != nil {
+		log.Printf("Failed to get the upload url: %v\n", err)
+		return ""
+	}
+	// @warn: do I have to do some additional signing??
+	return resp.Url
+}

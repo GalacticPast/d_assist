@@ -5,11 +5,27 @@ import "d_assist/internal/db"
 import "d_assist/templates/dashboard"
 
 import (
-	//	"github.com/starfederation/datastar-go/datastar"
+	"github.com/starfederation/datastar-go/datastar"
 	"log"
 	"net/http"
 	"runtime"
 )
+
+func Process_upload(w http.ResponseWriter, r *http.Request) {
+	res, _ := auth.Verify_cookie_and_get_claims(r)
+	if res == false {
+		// should we redirect??
+		// imma just crash for now
+		log.Fatal("This is only possible if the cookie has expired so")
+		runtime.Breakpoint()
+	}
+	component := template_dashboard.Show_spinner()
+	sse := datastar.NewSSE(w, r)
+	sse.PatchElementTempl(component)
+}
+
+func Upload_finished(w http.ResponseWriter, r *http.Request) {
+}
 
 func Serve(w http.ResponseWriter, r *http.Request) {
 	res, claims := auth.Verify_cookie_and_get_claims(r)

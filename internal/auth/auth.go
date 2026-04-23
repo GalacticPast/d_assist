@@ -1,6 +1,7 @@
 package auth
 
 import "d_assist/internal/db"
+
 import (
 	"crypto/hmac"
 	"crypto/rand"
@@ -27,6 +28,8 @@ type auth_config struct {
 
 var auth_configs auth_config
 
+var server_secret = []byte(os.Getenv("GOOGLE_CLIENT_SECRET"))
+
 func Init_oauth() {
 
 	auth_configs.google_login_conf = oauth2.Config{
@@ -38,8 +41,6 @@ func Init_oauth() {
 			"https://www.googleapis.com/auth/userinfo.profile"},
 	}
 }
-
-var server_secret = []byte(os.Getenv("GOOGLE_CLIENT_SECRET"))
 
 // gen_rand_string creates the base random payload (e.g., 32 bytes)
 func gen_rand_string() (string, error) {
@@ -184,7 +185,7 @@ func Google_callback(w http.ResponseWriter, r *http.Request) {
 			Value:    signed_jwt_token,
 			Path:     "/",
 			Expires:  time.Now().Add(24 * time.Hour),
-			HttpOnly: false,
+			HttpOnly: true,
 			Secure:   false, // @info: Only sends cookie over HTTPS (set to false ONLY on localhost)
 			SameSite: http.SameSiteLaxMode,
 		}
@@ -244,4 +245,33 @@ func Verify_cookie_and_get_claims(r *http.Request) (bool, jwt.Claims) {
 func Get_user_id_from_claims(claims *jwt.Claims) string {
 	id, _ := (*claims).GetSubject()
 	return id
+}
+
+type Signed_url struct {
+	File_name string `json:"file_name"`
+	URL       string `json:"url"`
+}
+
+func Get_signed_upload_url(w http.ResponseWriter, r *http.Request) {
+	res, _ := Verify_cookie_and_get_claims(r)
+
+	if res {
+		file_path := r.FormValue("file_path")
+		if file_path == "" {
+			http.Error(w, "File path is empty", http.StatusBadRequest)
+			return
+		}
+		rand_file_path := rand.Text() + file_path
+		signed_url := db.Get_signed_upload_url(rand_file_path)
+		response := Signed_url{
+			File_name: rand_file_path,
+			URL:       signed_url,
+		}
+		w.Header().Set("Content-type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(response)
+	}
+}
+func upload_file_finished(w http.ResponseWriter, r *http.Request) {
+
 }

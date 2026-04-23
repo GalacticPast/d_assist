@@ -18,7 +18,7 @@ type user_creds struct {
 }
 
 func main() {
-	err := godotenv.Load(".env.local")
+	err := godotenv.Load("../../.env.local")
 	if err != nil {
 		log.Fatal("Couldn't load env variables: ", err)
 		return
@@ -27,11 +27,12 @@ func main() {
 	auth.Init_oauth()
 
 	// Listen for the Datastar click event
-	static_files := http.Dir("./static")
+	static_files := http.Dir("../../static")
 	fs := http.FileServer(static_files)
 	http.Handle("/", http.FileServer(static_files))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 
+	// page specific
 	http.HandleFunc("/loading", loading_page)
 	http.HandleFunc("/dashboard/", dashboard.Serve)
 
@@ -39,6 +40,11 @@ func main() {
 	http.HandleFunc("/auth/google_signup", auth.Google_signup)
 	http.HandleFunc("/auth/google_signin", auth.Google_signin)
 	http.HandleFunc("/auth/google_callback", auth.Google_callback)
+
+	// file upload specific
+	http.HandleFunc("/process_upload", dashboard.Process_upload)
+	http.HandleFunc("/upload", auth.Get_signed_upload_url)
+	http.HandleFunc("/upload_finished", dashboard.Upload_finished)
 
 	fmt.Println("Server booting up on http://localhost:8080")
 	http.ListenAndServe(":8080", nil)
