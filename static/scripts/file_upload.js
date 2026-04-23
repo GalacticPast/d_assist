@@ -37,12 +37,14 @@ buttons.forEach((btn) => {
 dropzone.addEventListener("drop", (e) => {
   const files = e.dataTransfer.files;
   upload_file(files[0]);
+  fileInput.value = "";
 });
 
 // Handle selected files
 fileInput.onchange = (e) => {
   const files = fileInput.files;
   upload_file(files[0]);
+  fileInput.value = "";
 };
 
 async function upload_file(file) {
