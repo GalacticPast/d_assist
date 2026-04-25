@@ -1,4 +1,4 @@
-package internal
+package middleware
 
 import "d_assist/internal/auth"
 

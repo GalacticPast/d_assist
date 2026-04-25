@@ -1,6 +1,7 @@
 package auth
 
 import "d_assist/internal/db"
+import "d_assist/internal/types"
 
 import (
 	"crypto/hmac"
@@ -164,7 +165,7 @@ func Google_callback(w http.ResponseWriter, r *http.Request) {
 	}
 	defer resp.Body.Close()
 
-	var user_info db.User_info
+	var user_info da_types.User_info
 	err = json.NewDecoder(resp.Body).Decode(&user_info)
 	if err != nil {
 		log.Printf("json Unmarshal failed: %v\n", err)

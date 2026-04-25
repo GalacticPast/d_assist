@@ -1,5 +1,7 @@
 package db
 
+import "d_assist/internal/types"
+
 import (
 	"context"
 	"fmt"
@@ -13,22 +15,9 @@ import (
 	"time"
 )
 
-type supabase_client_type int
-
-const (
-	SUPABASE_PUBLIC_CLIENT = iota
-	SUPABASE_ADMIN_CLIENT  // 1
-)
-
-type User_info struct {
-	ID    string `json:"id"`
-	Email string `json:"email"`
-	Name  string `json:"name"`
-}
-
 // @todo: hmmm how to make this one time only, cause for the duration of this app this should only create 2 clients.
 // we should just be reusing it right?
-func Create_supabase_client(client_type supabase_client_type) (*supabase.Client, error) {
+func Create_supabase_client(client_type da_types.Supabase_client_type) (*supabase.Client, error) {
 
 	supabase_pub_url := os.Getenv("NEXT_PUBLIC_SUPABASE_URL")
 
@@ -36,10 +25,10 @@ func Create_supabase_client(client_type supabase_client_type) (*supabase.Client,
 	var err error = nil
 
 	switch client_type {
-	case SUPABASE_PUBLIC_CLIENT:
+	case da_types.SUPABASE_PUBLIC_CLIENT:
 		supabase_pub_anon_key := os.Getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY")
 		client, err = supabase.NewClient(supabase_pub_url, supabase_pub_anon_key, nil)
-	case SUPABASE_ADMIN_CLIENT:
+	case da_types.SUPABASE_ADMIN_CLIENT:
 		supabase_priv_secret_key := os.Getenv("NEXT_PRIVATE_SUPABASE_SECRET_KEY")
 		client, err = supabase.NewClient(supabase_pub_url, supabase_priv_secret_key, nil)
 	}
@@ -53,7 +42,7 @@ func Create_supabase_client(client_type supabase_client_type) (*supabase.Client,
 }
 
 func Exchange_code(code string) types.Session {
-	supabase_client, err := Create_supabase_client(SUPABASE_PUBLIC_CLIENT)
+	supabase_client, err := Create_supabase_client(da_types.SUPABASE_PUBLIC_CLIENT)
 	if err != nil {
 
 	}
@@ -71,7 +60,7 @@ func Exchange_code(code string) types.Session {
 }
 
 func Signin_via_oauth(provider string) string {
-	sb_client, err := Create_supabase_client(SUPABASE_PUBLIC_CLIENT)
+	sb_client, err := Create_supabase_client(da_types.SUPABASE_PUBLIC_CLIENT)
 	if err != nil {
 		return ""
 	}
@@ -89,7 +78,7 @@ func Signin_via_oauth(provider string) string {
 	return res.AuthorizationURL
 }
 
-func Check_if_user_exists(user_data *User_info) bool {
+func Check_if_user_exists(user_data *da_types.User_info) bool {
 	// @todo: have a connection pool
 	conn, err := pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
 	if err != nil {
@@ -112,7 +101,7 @@ func Check_if_user_exists(user_data *User_info) bool {
 	return false
 }
 
-func Get_JWT_Token(user_info *User_info) (string, error) {
+func Get_JWT_Token(user_info *da_types.User_info) (string, error) {
 
 	claims := jwt.MapClaims{
 		"role":  "authenticated", // Tells Supabase this is a logged-in user
@@ -135,7 +124,7 @@ func Get_JWT_Token(user_info *User_info) (string, error) {
 	return signedToken, nil
 }
 
-func Create_user(user_data *User_info) bool {
+func Create_user(user_data *da_types.User_info) bool {
 	// @todo: have a connection pool
 	conn, err := pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
 	if err != nil {
@@ -179,7 +168,7 @@ func Get_number_of_courses(user_id string) int {
 var bucket_name = "syllabus_pdf"
 
 func Get_signed_upload_url(file_path string) string {
-	supabase_client, err := Create_supabase_client(SUPABASE_ADMIN_CLIENT)
+	supabase_client, err := Create_supabase_client(da_types.SUPABASE_ADMIN_CLIENT)
 	if err != nil {
 		log.Printf("Failed to initalize the client: %v\n", err)
 		return ""
@@ -194,7 +183,7 @@ func Get_signed_upload_url(file_path string) string {
 }
 
 func Get_pdf_from_bucket(file_name string) ([]byte, error) {
-	supabase_client, err := Create_supabase_client(SUPABASE_ADMIN_CLIENT)
+	supabase_client, err := Create_supabase_client(da_types.SUPABASE_ADMIN_CLIENT)
 	if err != nil {
 		log.Printf("Failed to initalize the client: %v\n", err)
 		return nil, err

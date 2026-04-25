@@ -1,22 +1,18 @@
 package main
 
 import (
-	"d_assist/internal"
 	"d_assist/internal/auth"
 	"d_assist/internal/dashboard"
+	"d_assist/internal/middleware"
+)
+
+import (
 	"fmt"
 	"github.com/joho/godotenv"
 	"github.com/starfederation/datastar-go/datastar"
 	"log"
 	"net/http"
 )
-
-type user_creds struct {
-	First_Name string `json:"user_first_name"`
-	Last_Name  string `json:"user_last_name"`
-	Email      string `json:"user_email"`
-	Password   string `json:"user_password"`
-}
 
 func main() {
 	// load env variables
@@ -36,7 +32,7 @@ func main() {
 	http.HandleFunc("/loading", loading)
 
 	// page specific
-	http.Handle("/dashboard", internal.Verify_cookie(http.HandlerFunc(dashboard.Serve)))
+	http.Handle("/dashboard", middleware.Verify_cookie(http.HandlerFunc(dashboard.Serve)))
 
 	// auth specific routers
 	// auth  need to go through the verify_Cookie handler
@@ -46,9 +42,9 @@ func main() {
 	http.HandleFunc("/auth/google_callback", auth.Google_callback)
 
 	// file upload specific
-	http.Handle("/process_upload", internal.Verify_cookie(http.HandlerFunc(dashboard.Process_upload)))
-	http.Handle("/upload", internal.Verify_cookie(http.HandlerFunc(dashboard.Get_signed_upload_url)))
-	http.Handle("/upload_finished", internal.Verify_cookie(http.HandlerFunc(dashboard.Upload_finished)))
+	http.Handle("/process_upload", middleware.Verify_cookie(http.HandlerFunc(dashboard.Process_upload)))
+	http.Handle("/upload", middleware.Verify_cookie(http.HandlerFunc(dashboard.Get_signed_upload_url)))
+	http.Handle("/upload_finished", middleware.Verify_cookie(http.HandlerFunc(dashboard.Upload_finished)))
 
 	fmt.Println("Server booting up on http://localhost:8080")
 	http.ListenAndServe(":8080", nil)

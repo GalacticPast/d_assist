@@ -50,7 +50,7 @@ func Upload_finished(w http.ResponseWriter, r *http.Request) {
 		fmt.Errorf("Something wrong with pdf download %v\n", err)
 		return
 	}
-	gemini.Get_courses(pdf_bytes)
+	gemini.Extract_courses(&pdf_bytes)
 }
 
 func Serve(w http.ResponseWriter, r *http.Request) {
