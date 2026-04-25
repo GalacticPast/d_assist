@@ -1,3 +1,3 @@
 build:
-	go build -o app cmd/server/main.go
+	go build  -gcflags="all=-N -l" -o app cmd/server/main.go
 

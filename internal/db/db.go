@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"fmt"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/jackc/pgx/v5"
 	"github.com/supabase-community/gotrue-go/types"
@@ -190,4 +191,18 @@ func Get_signed_upload_url(file_path string) string {
 	}
 	// @warn: do I have to do some additional signing??
 	return resp.Url
+}
+
+func Get_pdf_from_bucket(file_name string) ([]byte, error) {
+	supabase_client, err := Create_supabase_client(SUPABASE_ADMIN_CLIENT)
+	if err != nil {
+		log.Printf("Failed to initalize the client: %v\n", err)
+		return nil, err
+	}
+	pdf_bytes, err := supabase_client.Storage.DownloadFile("syllabus_pdf", file_name)
+	if err != nil {
+		fmt.Errorf("Supabase error: %v\n", err)
+		return nil, err
+	}
+	return pdf_bytes, nil
 }

@@ -7,7 +7,7 @@ templ layout() {
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 			<title>College Assist Dashboard</title>
-			<link rel="stylesheet" href="/static/dashboard/styles.css"/>
+			<link rel="stylesheet" href="./dashboard/styles.css"/>
 			<script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@v1.0.0/bundles/datastar.js"></script>
 		</head>
 		<body>
@@ -36,12 +36,12 @@ templ layout() {
 						</button>
 					</div>
 				</header>
-                <input id="is_uploading" data-bind:is_uploading style="display: none">
+				<input id="is_uploading" data-bind:is_uploading style="display: none"/>
 				<main class="main-content">
 					{ children... }
 				</main>
 			</div>
-			<script src="/static/scripts/file_upload.js"></script>
+			<script src="./scripts/file_upload.js"></script>
 			<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 		</body>
 	</html>
@@ -79,8 +79,8 @@ templ Setup(course_count int) {
 }
 
 templ Show_spinner() {
-		<div id="loader-container">
-			<h2 id="loader-h2">Wait a while we process your document.</h2>
-			<span id="loader-spinner" class="loader"></span>
-		</div>
+	<div id="loader-container">
+		<h2 id="loader-h2">Wait a while we process your document.</h2>
+		<span id="loader-spinner" class="loader"></span>
+	</div>
 }

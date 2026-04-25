@@ -208,10 +208,10 @@ func Google_callback(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func Verify_cookie(r *http.Request) (bool, error) {
+func Verify_cookie(r *http.Request) error {
 	named_cookie := r.CookiesNamed("d_assist")
 	if len(named_cookie) == 0 {
-		return false, errors.New("Couldn't find d_assist cookie")
+		return errors.New("Couldn't find d_assist cookie")
 	}
 
 	tokenString := named_cookie[0].Value
@@ -225,7 +225,7 @@ func Verify_cookie(r *http.Request) (bool, error) {
 		return []byte(os.Getenv("SUPABASE_JWT_KEY")), nil
 	})
 	if err != nil || !token.Valid {
-		return false, errors.New("Token is not valid")
+		return errors.New("Token is not valid")
 	}
 	claims := token.Claims.(jwt.MapClaims)
 	exp_time, err := claims.GetExpirationTime()
@@ -236,16 +236,16 @@ func Verify_cookie(r *http.Request) (bool, error) {
 	}
 
 	if time.Now().After(exp_time.Time) {
-		return false, errors.New("Token expired")
+		return errors.New("Token expired")
 	}
-
-	return true, nil
+	return nil
 }
 
-func Get_claims_from_cookie(r *http.Request) (bool, jwt.Claims) {
+// @perf: this is kinda pointless right maybe attach the pre parsed token beforehand on the http request
+func Get_claims_from_cookie(r *http.Request) jwt.Claims {
 	named_cookie := r.CookiesNamed("d_assist")
 	if len(named_cookie) == 0 {
-		return false, nil
+		return nil
 	}
 
 	tokenString := named_cookie[0].Value
@@ -259,53 +259,14 @@ func Get_claims_from_cookie(r *http.Request) (bool, jwt.Claims) {
 		return []byte(os.Getenv("SUPABASE_JWT_KEY")), nil
 	})
 	if err != nil || !token.Valid {
-		return false, nil
+		return nil
 	}
 	claims := token.Claims.(jwt.MapClaims)
-	exp_time, err := claims.GetExpirationTime()
 
-	if err != nil {
-		log.Fatal("What the hell, cookie exp time was not set")
-		runtime.Breakpoint()
-	}
-
-	if time.Now().After(exp_time.Time) {
-		return false, nil
-	}
-
-	return true, claims
+	return claims
 }
 
 func Get_user_id_from_claims(claims *jwt.Claims) string {
 	id, _ := (*claims).GetSubject()
 	return id
-}
-
-type Signed_url struct {
-	File_name string `json:"file_name"`
-	URL       string `json:"url"`
-}
-
-func Get_signed_upload_url(w http.ResponseWriter, r *http.Request) {
-	res, _ := Get_claims_from_cookie(r)
-
-	if res {
-		file_path := r.FormValue("file_path")
-		if file_path == "" {
-			http.Error(w, "File path is empty", http.StatusBadRequest)
-			return
-		}
-		rand_file_path := rand.Text() + file_path
-		signed_url := db.Get_signed_upload_url(rand_file_path)
-		response := Signed_url{
-			File_name: rand_file_path,
-			URL:       signed_url,
-		}
-		w.Header().Set("Content-type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(response)
-	}
-}
-func upload_file_finished(w http.ResponseWriter, r *http.Request) {
-
 }
