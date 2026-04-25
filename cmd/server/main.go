@@ -3,6 +3,7 @@ package main
 import (
 	"d_assist/internal/auth"
 	"d_assist/internal/dashboard"
+	"d_assist/internal/homepage"
 	"d_assist/internal/middleware"
 )
 
@@ -25,14 +26,18 @@ func main() {
 	// init oauth
 	auth.Init_oauth()
 
-	web_fs := http.FileServer(http.Dir("./web"))
-	http.Handle("/", web_fs)
+	static_fs := http.FileServer(http.Dir("./ui/static/"))
+	http.Handle("/", static_fs)
+
 	//@perf: there is an extra trip happening
 	// idk how to redirect the user when they first connect to the server
 	http.HandleFunc("/loading", loading)
 
 	// page specific
 	http.Handle("/dashboard", middleware.Verify_cookie(http.HandlerFunc(dashboard.Serve)))
+	http.Handle("/login", http.HandlerFunc(auth.Serve_login))
+	http.Handle("/signup", http.HandlerFunc(auth.Serve_signup))
+	http.Handle("/homepage", http.HandlerFunc(homepage.Serve))
 
 	// auth specific routers
 	// auth  need to go through the verify_Cookie handler

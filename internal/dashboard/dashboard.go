@@ -4,7 +4,7 @@ import (
 	"d_assist/internal/auth"
 	"d_assist/internal/db"
 	"d_assist/internal/gemini"
-	"d_assist/templates/dashboard"
+	"d_assist/ui/templates/dashboard"
 )
 
 import (
@@ -21,7 +21,7 @@ type Signed_url struct {
 }
 
 func Process_upload(w http.ResponseWriter, r *http.Request) {
-	component := template_dashboard.Show_spinner()
+	component := dashboard_templ.Show_spinner()
 	sse := datastar.NewSSE(w, r)
 	sse.PatchElementTempl(component)
 }
@@ -58,7 +58,7 @@ func Serve(w http.ResponseWriter, r *http.Request) {
 	user_id := auth.Get_user_id_from_claims(&claims)
 	count := db.Get_number_of_courses(user_id)
 
-	component := template_dashboard.Setup(count)
+	component := dashboard_templ.Setup(count)
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 	// Render the component to the http.ResponseWriter

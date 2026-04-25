@@ -2,6 +2,7 @@ package gemini
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"google.golang.org/genai"
 	"os"
@@ -84,6 +85,14 @@ func Extract_courses(pdf *[]byte) {
 	result, err := gem_client.Models.GenerateContent(context.Background(), model, contents, config)
 	if err != nil {
 		fmt.Errorf("what happened to the response %v\n", err)
+		return
 	}
-
+	count := len(result.Candidates)
+	if count == 0 {
+		fmt.Errorf("What no errors but the response.Candiates count is 0??")
+		return
+	}
+	//@fix: make this robust
+	json_data, err := json.MarshalIndent(result, "", "  ")
+	fmt.Println(string(json_data))
 }

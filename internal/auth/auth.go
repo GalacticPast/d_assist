@@ -2,6 +2,8 @@ package auth
 
 import "d_assist/internal/db"
 import "d_assist/internal/types"
+import "d_assist/ui/templates/login"
+import "d_assist/ui/templates/signup"
 
 import (
 	"crypto/hmac"
@@ -270,4 +272,28 @@ func Get_claims_from_cookie(r *http.Request) jwt.Claims {
 func Get_user_id_from_claims(claims *jwt.Claims) string {
 	id, _ := (*claims).GetSubject()
 	return id
+}
+
+func Serve_login(w http.ResponseWriter, r *http.Request) {
+	component := login_templ.Setup()
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	// Render the component to the http.ResponseWriter
+	err := component.Render(r.Context(), w)
+	if err != nil {
+		http.Error(w, "failed to render template", http.StatusInternalServerError)
+	}
+
+}
+
+func Serve_signup(w http.ResponseWriter, r *http.Request) {
+	component := signup_templ.Setup()
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	// Render the component to the http.ResponseWriter
+	err := component.Render(r.Context(), w)
+	if err != nil {
+		http.Error(w, "failed to render template", http.StatusInternalServerError)
+	}
+
 }
