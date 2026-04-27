@@ -65,6 +65,7 @@ async function upload_file(file) {
   try {
     const upload_url = new URL("/upload", window.location.origin);
     upload_url.searchParams.append("file_path", `${file.name}`);
+    upload_url.searchParams.append("button_id", `${event.target.id}`);
 
     let response = await fetch(upload_url);
     const data = await response.json();
@@ -93,6 +94,7 @@ async function upload_file(file) {
     // oh well
     const upload_finished = new URL("/upload_finished", window.location.origin);
     upload_finished.searchParams.append("file_path", `${rand_file_path}`);
+    upload_finished.searchParams.append("button_id", `${event.target.id}`);
     response = await fetch(upload_finished);
   } catch (err) {
     alert(`Error: ${err.message}`);

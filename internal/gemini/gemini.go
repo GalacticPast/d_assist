@@ -6,9 +6,10 @@ import (
 	"fmt"
 	"google.golang.org/genai"
 	"os"
+	"strings"
 )
 
-type Syllabus_schema struct {
+type Syllabus struct {
 	Course_title string       `json:"course_title"`
 	Assignments  []Assignment `json:"assignments"`
 }
@@ -25,7 +26,7 @@ var syllabusSchema = &genai.Schema{
 			Type:        genai.TypeString,
 			Description: "The course name extracted from the pdf.",
 		},
-		"important_dates": {
+		"assignments": {
 			Type:        genai.TypeArray,
 			Description: "A list of all critical assignments, midterms, finals, and readings.",
 			Items: &genai.Schema{
@@ -48,7 +49,7 @@ var syllabusSchema = &genai.Schema{
 			},
 		},
 	},
-	Required: []string{"important_dates", "course_title"},
+	Required: []string{"course_title", "important_dates"},
 }
 
 func create_gemini_client() (*genai.Client, error) {
@@ -65,34 +66,47 @@ func create_gemini_client() (*genai.Client, error) {
 
 var model = "gemini-2.5-flash"
 
-func Extract_courses(pdf *[]byte) {
+func Extract_courses(pdf *[]byte) (*Syllabus, error) {
 	gem_client, err := create_gemini_client()
 	if err != nil {
 		fmt.Errorf("Genai Client creation error %v\n", err)
-		return
+		return nil, err
 	}
 	config := &genai.GenerateContentConfig{
 		ResponseMIMEType: "application/json",
 		ResponseSchema:   syllabusSchema,
 	}
-	promt := "You are an elite academic assistant. Analyze this course syllabus carefully. Extract all major assignments, exams, and deliverables. Determine their due dates and what percentage of the final grade they are worth. If a due date is not explicitly stated but implied (e.g. week 3), estimate it based on standard semester schedules or just write 'TBA'"
+	promt := `First, examine the provided document. If the document is clearly NOT a course syllabus, immediately stop and return exactly "ERROR_NOT_A_SYLLABUS" 
+	and nothing else. If the document IS a syllabus, you are an elite academic assistant. Analyze the course syllabus carefully.
+	Extract all major assignments, exams, and deliverables. Determine their due dates and what percentage of the final grade they are worth.
+	If a due date is not explicitly stated but implied (e.g. week 3), estimate it based on standard semester schedules or just write 'TBA'.`
+
 	promt_part := genai.NewPartFromText(promt)
 	pdf_part := genai.NewPartFromBytes(*pdf, "application/pdf")
 	contents := []*genai.Content{
 		{Parts: []*genai.Part{promt_part, pdf_part}},
 	}
 
-	result, err := gem_client.Models.GenerateContent(context.Background(), model, contents, config)
+	response, err := gem_client.Models.GenerateContent(context.Background(), model, contents, config)
 	if err != nil {
 		fmt.Errorf("what happened to the response %v\n", err)
-		return
+		return nil, err
 	}
-	count := len(result.Candidates)
-	if count == 0 {
-		fmt.Errorf("What no errors but the response.Candiates count is 0??")
-		return
+	if len(response.Candidates) == 0 {
+		fmt.Errorf("%v\n", err)
+		return nil, err
 	}
-	//@fix: make this robust
-	json_data, err := json.MarshalIndent(result, "", "  ")
-	fmt.Println(string(json_data))
+	validate_pdf := fmt.Sprint(response.Candidates[0].Content.Parts[0])
+
+	// Check for the exact error string (using strings.TrimSpace to remove any accidental newlines)
+	if strings.TrimSpace(validate_pdf) == "ERROR_NOT_A_SYLLABUS" {
+		fmt.Errorf("Validation Failed: The user did not upload a syllabus.")
+		return nil, err
+	}
+
+	json_string := string(response.Candidates[0].Content.Parts[0].Text)
+
+	var syllabus Syllabus
+	json.Unmarshal([]byte(json_string), &syllabus)
+	return &syllabus, nil
 }

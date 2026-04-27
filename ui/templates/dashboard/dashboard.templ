@@ -29,7 +29,7 @@ templ layout() {
 					</div>
 					<div class="header-right">
 						<input type="file" id="file-input" hidden accept="application/pdf"/>
-						<button class="select-btn" hidden>Upload PDF</button>
+						<input type="file">Upload PDF</button>
 						<button class="btn btn-ghost">
 							<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
 							Sign Out
@@ -71,7 +71,7 @@ templ Setup(course_count int) {
 					</div>
 					<h2>Drag & drop your syllabus PDF</h2>
 					<p>or click to browse from your computer</p>
-					<button class="select-btn">Select PDF</button>
+					<button class="select-btn" id="upload-syllabus-btn">Select PDF</button>
 				</div>
 			</div>
 		}

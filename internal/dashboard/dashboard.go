@@ -45,12 +45,16 @@ func Get_signed_upload_url(w http.ResponseWriter, r *http.Request) {
 
 func Upload_finished(w http.ResponseWriter, r *http.Request) {
 	file_name := r.FormValue("file_path")
+	button_id := r.FormValue("button_id")
 	pdf_bytes, err := db.Get_pdf_from_bucket(file_name)
 	if err != nil {
 		fmt.Errorf("Something wrong with pdf download %v\n", err)
 		return
 	}
-	gemini.Extract_courses(&pdf_bytes)
+	if button_id == "upload-syllabus-btn" {
+		gemini.Extract_courses(&pdf_bytes)
+	}
+
 }
 
 func Serve(w http.ResponseWriter, r *http.Request) {
