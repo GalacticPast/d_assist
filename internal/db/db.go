@@ -145,7 +145,7 @@ func Create_user(user_data *da_types.User_info) bool {
 	return true
 }
 
-func Get_courses(user_id string) *[]da_types.Course {
+func Get_courses(user_id string) (*[]da_types.Course, error) {
 	conn, err := pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
 	if err != nil {
 		log.Fatalf("Failed to connect to the database: %v", err)
@@ -157,13 +157,17 @@ func Get_courses(user_id string) *[]da_types.Course {
 
 	args := pgx.NamedArgs{"user_id": user_id}
 
-	var courses []da_types.Course
-	err = conn.QueryRow(context.Background(), query, args).Scan(&courses)
-	if err != nil || len(courses) == 0 {
-		fmt.Errorf("Failed to get courses: %v", err)
-		return &courses
+	rows, err := conn.Query(context.Background(), query, args)
+	if err != nil {
+		return nil, err
 	}
-	return &courses
+
+	courses, err := pgx.CollectRows(rows, pgx.RowToStructByName[da_types.Course])
+	if err != nil {
+		return nil, fmt.Errorf("failed to collect rows: %w", err)
+	}
+
+	return &courses, nil
 }
 
 var bucket_name = "syllabus_pdf"
@@ -191,7 +195,9 @@ func Get_pdf_from_bucket(file_name string) ([]byte, error) {
 	}
 	pdf_bytes, err := supabase_client.Storage.DownloadFile("syllabus_pdf", file_name)
 	if err != nil {
-		fmt.Errorf("Supabase error: %v\n", err)
+		fmt.Println(err.Error())
+
+		err = fmt.Errorf("Supabase error: %v\n", err)
 		return nil, err
 	}
 	return pdf_bytes, nil
@@ -259,9 +265,6 @@ func Insert_new_syllabus(user_id string, syllabus *da_types.Syllabus) error {
 	// 4. Execute the Batch Insert
 	// Passing the slice of maps automatically triggers a multi-row INSERT in Supabase
 	supabase_client.From("assignments").Insert(batchAssignments, false, "", "", "").Execute()
-	if err != nil {
-		return fmt.Errorf("failed to batch insert assignments: %w", err)
-	}
 
 	log.Printf("Successfully inserted course and %d assignments.", len(batchAssignments))
 	return nil

@@ -1,53 +1,49 @@
 const dropzone = document.getElementById("dropzone");
-const fileInput = document.getElementById("file-input");
 const statusText = document.getElementById("status-text");
-const buttons = document.querySelectorAll(".select-btn");
 
-// Trigger file dialog
-buttons.forEach((btn) => {
-  btn.addEventListener("click", () => {
-    fileInput.click();
+const file_inputs = document.querySelectorAll(".file-input");
+const syllabus_pdf_file_input = document.getElementById("syllabus-upload");
+const syllabus_upload_btn = document.getElementById("syllabus-upload-btn");
+
+if (syllabus_upload_btn && syllabus_pdf_file_input) {
+  syllabus_upload_btn.addEventListener("click", () => {
+    syllabus_pdf_file_input.click();
   });
-});
+  syllabus_pdf_file_input.addEventListener("change", (e) => {
+    if (syllabus_pdf_file_input.files.length > 0) {
+      upload_file("syllabus-upload-btn", syllabus_pdf_file_input.files[0]);
+      syllabus_pdf_file_input.value = "";
+    }
+  });
+}
 
-// Highlighting the dropzone
-["dragenter", "dragover"].forEach((eventName) => {
-  dropzone.addEventListener(
-    eventName,
-    (e) => {
+if (dropzone) {
+  ["dragenter", "dragover"].forEach((eventName) => {
+    dropzone.addEventListener(eventName, (e) => {
       e.preventDefault();
       dropzone.classList.add("active");
-    },
-    false,
-  );
-});
+    });
+  });
 
-["dragleave", "drop"].forEach((eventName) => {
-  dropzone.addEventListener(
-    eventName,
-    (e) => {
+  ["dragleave", "drop"].forEach((eventName) => {
+    dropzone.addEventListener(eventName, (e) => {
       e.preventDefault();
       dropzone.classList.remove("active");
-    },
-    false,
-  );
-});
+    });
+  });
 
-// Handle dropped files
-dropzone.addEventListener("drop", (e) => {
-  const files = e.dataTransfer.files;
-  upload_file(files[0]);
-  fileInput.value = "";
-});
+  dropzone.addEventListener("drop", (e) => {
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      //@hack: this is a hack I need to make it more robust
+      if (syllabus_pdf_file_input) {
+        upload_file("syllabus-upload-btn", files[0]);
+      }
+    }
+  });
+}
 
-// Handle selected files
-fileInput.onchange = (e) => {
-  const files = fileInput.files;
-  upload_file(files[0]);
-  fileInput.value = "";
-};
-
-async function upload_file(file) {
+async function upload_file(button_id, file) {
   if (!file || file.type !== "application/pdf") {
     alert("Please upload a PDF file.");
     return;
@@ -65,7 +61,7 @@ async function upload_file(file) {
   try {
     const upload_url = new URL("/upload", window.location.origin);
     upload_url.searchParams.append("file_path", `${file.name}`);
-    upload_url.searchParams.append("button_id", `${event.target.id}`);
+    upload_url.searchParams.append("button_id", button_id);
 
     let response = await fetch(upload_url);
     const data = await response.json();
@@ -81,20 +77,23 @@ async function upload_file(file) {
 
     const token_from_signed_upload_url = url_obj.searchParams.get("token");
 
-    const { data: uploadData, error: uploadError } =
+    const bucketName =
+      button_id === "syllabus-upload-btn" ? "syllabus_pdf" : "class_slides";
+
+    const { data: upload_data, error: upload_error } =
       await supabase_client.storage
-        .from("syllabus_pdf")
+        .from(bucketName)
         .uploadToSignedUrl(rand_file_path, token_from_signed_upload_url, file);
 
-    if (uploadError) {
-      throw new Error(`Upload Failed: ${uploadError.message}`);
+    if (upload_error) {
+      throw new Error(`Upload Failed: ${upload_error.message}`);
     }
     // i think this is counter to the tao of datastar. Im too stupid to make this work
     // well actually I think I can make it work now
     // oh well
     const upload_finished = new URL("/upload_finished", window.location.origin);
+    upload_finished.searchParams.append("button_id", button_id);
     upload_finished.searchParams.append("file_path", `${rand_file_path}`);
-    upload_finished.searchParams.append("button_id", `${event.target.id}`);
     response = await fetch(upload_finished);
   } catch (err) {
     alert(`Error: ${err.message}`);

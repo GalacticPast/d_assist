@@ -37,7 +37,7 @@ func main() {
 	http.Handle("/dashboard/", middleware.Verify_cookie(http.HandlerFunc(dashboard.Serve)))
 	http.Handle("/login/", http.HandlerFunc(auth.Serve_login))
 	http.Handle("/signup/", http.HandlerFunc(auth.Serve_signup))
-	http.Handle("/homepage", http.HandlerFunc(homepage.Serve))
+	http.Handle("/homepage/", http.HandlerFunc(homepage.Serve))
 
 	// auth specific routers
 	// auth  need to go through the verify_Cookie handler

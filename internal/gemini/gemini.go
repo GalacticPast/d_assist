@@ -45,7 +45,7 @@ var syllabusSchema = &genai.Schema{
 			},
 		},
 	},
-	Required: []string{"course_title", "course_abbr", "important_dates"},
+	Required: []string{"course_title", "course_abbr", "assignments"},
 }
 
 func create_gemini_client() (*genai.Client, error) {
@@ -54,7 +54,9 @@ func create_gemini_client() (*genai.Client, error) {
 		APIKey: os.Getenv("GOOGLE_AI_API_KEY"),
 	})
 	if err != nil {
-		fmt.Errorf("Genai Client creation error %v\n", err)
+		err = fmt.Errorf("Genai Client creation error %v\n", err)
+		fmt.Println(err.Error())
+
 		return nil, err
 	}
 	return client, nil
@@ -65,7 +67,8 @@ var model = "gemini-2.5-flash"
 func Extract_syllabus(pdf *[]byte) (*da_types.Syllabus, error) {
 	gem_client, err := create_gemini_client()
 	if err != nil {
-		fmt.Errorf("Genai Client creation error %v\n", err)
+		err = fmt.Errorf("Genai Client creation error %v\n", err)
+		fmt.Println(err.Error())
 		return nil, err
 	}
 	config := &genai.GenerateContentConfig{
@@ -85,18 +88,24 @@ func Extract_syllabus(pdf *[]byte) (*da_types.Syllabus, error) {
 
 	response, err := gem_client.Models.GenerateContent(context.Background(), model, contents, config)
 	if err != nil {
-		fmt.Errorf("what happened to the response %v\n", err)
+		err = fmt.Errorf("what happened to the response %v\n", err)
+		fmt.Println(err.Error())
+
 		return nil, err
 	}
 	if len(response.Candidates) == 0 {
-		fmt.Errorf("%v\n", err)
+		err = fmt.Errorf("%v\n", err)
+		fmt.Println(err.Error())
+
 		return nil, err
 	}
 	validate_pdf := fmt.Sprint(response.Candidates[0].Content.Parts[0])
 
 	// Check for the exact error string (using strings.TrimSpace to remove any accidental newlines)
 	if strings.TrimSpace(validate_pdf) == "ERROR_NOT_A_SYLLABUS" {
-		fmt.Errorf("Validation Failed: The user did not upload a syllabus.")
+		err = fmt.Errorf("Validation Failed: The user did not upload a syllabus.")
+		fmt.Println(err.Error())
+
 		return nil, err
 	}
 

@@ -28,10 +28,11 @@ type Task struct {
 }
 
 type Course struct {
-	Title string
-	Color string
-	Badge string
-	Tasks []Task
+	Title   string `db:"name"`
+	Color   string `db:"color"`
+	Badge   string `db:"code"`
+	Tasks   []Task `db:"-"`
+	Quizzes []Quiz `db:"-"`
 }
 
 type Syllabus struct {
@@ -39,6 +40,11 @@ type Syllabus struct {
 	Course_abbr  string       `json:"course_abbr"`
 	Assignments  []Assignment `json:"assignments"`
 }
+type Quiz struct {
+	Quiz_id string `db:"quiz_id"`
+	Title   string `db:"quiz_title"`
+}
+
 type Assignment struct {
 	Title    string `json:"title"`
 	Due_date string `json:"dueDate"`

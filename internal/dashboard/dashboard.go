@@ -53,28 +53,49 @@ func Upload_finished(w http.ResponseWriter, r *http.Request) {
 	pdf_bytes, err := db.Get_pdf_from_bucket(file_name)
 	if err != nil {
 		fmt.Errorf("Something wrong with pdf download %v\n", err)
+		fmt.Println(err.Error())
+
 		return
 	}
-	if button_id == "upload-syllabus-btn" {
+	if button_id == "syllabus-upload-btn" {
 		syllabus, err := gemini.Extract_syllabus(&pdf_bytes)
 		if err != nil {
-			fmt.Errorf("Something wrong with gemini AI %v\n", err)
-		}
-		db.Insert_new_syllabus(user_id, syllabus)
-	}
+			err = fmt.Errorf("Something wrong with gemini AI: %v\n", err)
+			fmt.Println(err.Error())
 
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		err = db.Insert_new_syllabus(user_id, syllabus)
+		if err != nil {
+			err = fmt.Errorf("Something wrong with supabase: %v\n", err)
+			fmt.Println(err.Error())
+
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	} else if button_id == "class_slides" {
+		err = fmt.Errorf("We dont currently support pdf slides")
+		fmt.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
 
 func Serve(w http.ResponseWriter, r *http.Request) {
 	claims := auth.Get_claims_from_cookie(r)
 	user_id := auth.Get_user_id_from_claims(&claims)
-	courses := db.Get_courses(user_id)
+	courses, err := db.Get_courses(user_id)
+
+	if err != nil {
+		fmt.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 
 	component := dashboard_templ.Setup(0, courses)
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 	// Render the component to the http.ResponseWriter
-	err := component.Render(r.Context(), w)
+	err = component.Render(r.Context(), w)
 	if err != nil {
 		http.Error(w, "failed to render template", http.StatusInternalServerError)
 	}
