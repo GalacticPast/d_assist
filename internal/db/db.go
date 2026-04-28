@@ -12,6 +12,8 @@ import (
 	"log"
 	"os"
 	"runtime"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -143,7 +145,7 @@ func Create_user(user_data *da_types.User_info) bool {
 	return true
 }
 
-func Get_number_of_courses(user_id string) int {
+func Get_courses(user_id string) *[]da_types.Course {
 	conn, err := pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
 	if err != nil {
 		log.Fatalf("Failed to connect to the database: %v", err)
@@ -151,18 +153,17 @@ func Get_number_of_courses(user_id string) int {
 	}
 	defer conn.Close(context.Background())
 
-	query := "SELECT COUNT(*) FROM courses WHERE user_id = (@user_id)"
+	query := "SELECT name, code, color FROM courses WHERE user_id = (@user_id)"
 
 	args := pgx.NamedArgs{"user_id": user_id}
 
-	var count int
-	err = conn.QueryRow(context.Background(), query, args).Scan(&count)
-
-	if err != nil {
-		log.Fatalf("Failed to count courses: %v", err)
-		return 0
+	var courses []da_types.Course
+	err = conn.QueryRow(context.Background(), query, args).Scan(&courses)
+	if err != nil || len(courses) == 0 {
+		fmt.Errorf("Failed to get courses: %v", err)
+		return &courses
 	}
-	return count
+	return &courses
 }
 
 var bucket_name = "syllabus_pdf"
@@ -194,4 +195,74 @@ func Get_pdf_from_bucket(file_name string) ([]byte, error) {
 		return nil, err
 	}
 	return pdf_bytes, nil
+}
+
+func Insert_new_syllabus(user_id string, syllabus *da_types.Syllabus) error {
+	supabase_client, err := Create_supabase_client(da_types.SUPABASE_ADMIN_CLIENT)
+	if err != nil {
+		log.Printf("Failed to initalize the client: %v\n", err)
+		return err
+	}
+
+	var courseResult []map[string]interface{}
+
+	_, err = supabase_client.From("courses").Insert(map[string]interface{}{
+		"user_id": user_id,
+		"name":    syllabus.Course_title,
+		"code":    syllabus.Course_abbr,
+	}, false, "", "", "").ExecuteTo(&courseResult)
+
+	if err != nil {
+		return fmt.Errorf("failed to insert course: %w", err)
+	}
+
+	// Extract the UUID of the newly created course
+	if len(courseResult) == 0 {
+		return fmt.Errorf("course inserted but no ID was returned")
+	}
+	courseID := courseResult[0]["id"].(string)
+
+	// 3. Prepare the Assignments for Batch Insertion
+	var batchAssignments []map[string]interface{}
+
+	// Get the current year to append to dates (since syllabi rarely include the year)
+	currentYear := time.Now().Year()
+
+	for _, a := range syllabus.Assignments {
+		// --- CLEANUP: Weight ---
+		// Remove '%' and convert to float for the NUMERIC(5,2) column
+		weightClean := strings.TrimSpace(strings.TrimSuffix(a.Weight, "%"))
+		weightNum, _ := strconv.ParseFloat(weightClean, 64)
+		// Note: If ParseFloat fails (e.g., if weight is "N/A"), it defaults to 0.00, which is safe for the DB.
+
+		// --- CLEANUP: Date ---
+		// LLMs usually return dates like "Oct 20". We append the year and parse it.
+		dateStringWithYear := fmt.Sprintf("%s %d", a.Due_date, currentYear)
+		parsedDate, parseErr := time.Parse("Jan 02 2006", dateStringWithYear)
+
+		if parseErr != nil {
+			// Fallback: If the LLM returned garbage like "TBD", default the date to 1 month from now
+			// so the DB doesn't reject the insert (since due_date is NOT NULL)
+			parsedDate = time.Now().AddDate(0, 1, 0)
+		}
+
+		// --- APPEND TO BATCH ---
+		batchAssignments = append(batchAssignments, map[string]interface{}{
+			"course_id": courseID, // Links to the parent course
+			"title":     a.Title,
+			"due_date":  parsedDate,
+			"weight":    weightNum,
+			// difficulty defaults to 3 via SQL, so we can omit it
+		})
+	}
+
+	// 4. Execute the Batch Insert
+	// Passing the slice of maps automatically triggers a multi-row INSERT in Supabase
+	supabase_client.From("assignments").Insert(batchAssignments, false, "", "", "").Execute()
+	if err != nil {
+		return fmt.Errorf("failed to batch insert assignments: %w", err)
+	}
+
+	log.Printf("Successfully inserted course and %d assignments.", len(batchAssignments))
+	return nil
 }

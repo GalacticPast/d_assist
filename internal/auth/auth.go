@@ -176,6 +176,10 @@ func Google_callback(w http.ResponseWriter, r *http.Request) {
 	// we check it anyways
 	if auth_state == "google_signin" {
 		res := db.Check_if_user_exists(&user_info)
+		if res == false {
+			http.Redirect(w, r, "/signup/", http.StatusFound)
+			return
+		}
 
 		signed_jwt_token, err := db.Get_JWT_Token(&user_info)
 
@@ -194,16 +198,12 @@ func Google_callback(w http.ResponseWriter, r *http.Request) {
 		}
 		http.SetCookie(w, auth_cookie)
 
-		if res == true {
-			http.Redirect(w, r, "/dashboard", http.StatusFound)
-		} else {
-			http.Redirect(w, r, "/signup", http.StatusUnauthorized)
-		}
+		http.Redirect(w, r, "/dashboard/", http.StatusFound)
 
 	} else if auth_state == "google_signup" {
 		res := db.Create_user(&user_info)
 		if res == true {
-			http.Redirect(w, r, "/dashboard", http.StatusFound)
+			http.Redirect(w, r, "/dashboard/", http.StatusFound)
 		} else if res == false {
 			log.Printf("How is this possible??")
 		}

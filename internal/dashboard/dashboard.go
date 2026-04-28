@@ -46,13 +46,21 @@ func Get_signed_upload_url(w http.ResponseWriter, r *http.Request) {
 func Upload_finished(w http.ResponseWriter, r *http.Request) {
 	file_name := r.FormValue("file_path")
 	button_id := r.FormValue("button_id")
+	//@info: shorthand this
+	claims := auth.Get_claims_from_cookie(r)
+	user_id := auth.Get_user_id_from_claims(&claims)
+
 	pdf_bytes, err := db.Get_pdf_from_bucket(file_name)
 	if err != nil {
 		fmt.Errorf("Something wrong with pdf download %v\n", err)
 		return
 	}
 	if button_id == "upload-syllabus-btn" {
-		gemini.Extract_courses(&pdf_bytes)
+		syllabus, err := gemini.Extract_syllabus(&pdf_bytes)
+		if err != nil {
+			fmt.Errorf("Something wrong with gemini AI %v\n", err)
+		}
+		db.Insert_new_syllabus(user_id, syllabus)
 	}
 
 }
@@ -60,9 +68,9 @@ func Upload_finished(w http.ResponseWriter, r *http.Request) {
 func Serve(w http.ResponseWriter, r *http.Request) {
 	claims := auth.Get_claims_from_cookie(r)
 	user_id := auth.Get_user_id_from_claims(&claims)
-	count := db.Get_number_of_courses(user_id)
+	courses := db.Get_courses(user_id)
 
-	component := dashboard_templ.Setup(count)
+	component := dashboard_templ.Setup(0, courses)
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 	// Render the component to the http.ResponseWriter

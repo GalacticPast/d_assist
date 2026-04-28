@@ -19,3 +19,28 @@ type User_creds struct {
 	Email      string `json:"user_email"`
 	Password   string `json:"user_password"`
 }
+
+type Task struct {
+	Title          string
+	Due_date       string
+	Progress       string // its going go be n%
+	Progress_color string // green for 100% and dark for everything else
+}
+
+type Course struct {
+	Title string
+	Color string
+	Badge string
+	Tasks []Task
+}
+
+type Syllabus struct {
+	Course_title string       `json:"course_title"`
+	Course_abbr  string       `json:"course_abbr"`
+	Assignments  []Assignment `json:"assignments"`
+}
+type Assignment struct {
+	Title    string `json:"title"`
+	Due_date string `json:"dueDate"`
+	Weight   string `json:"weight"`
+}

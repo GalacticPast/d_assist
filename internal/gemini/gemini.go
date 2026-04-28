@@ -1,5 +1,7 @@
 package gemini
 
+import "d_assist/internal/types"
+
 import (
 	"context"
 	"encoding/json"
@@ -9,47 +11,41 @@ import (
 	"strings"
 )
 
-type Syllabus struct {
-	Course_title string       `json:"course_title"`
-	Assignments  []Assignment `json:"assignments"`
-}
-type Assignment struct {
-	Title    string `json:"title"`
-	Due_date string `json:"dueDate"`
-	Weight   string `json:"weight"`
-}
-
 var syllabusSchema = &genai.Schema{
 	Type: genai.TypeObject,
 	Properties: map[string]*genai.Schema{
 		"course_title": {
 			Type:        genai.TypeString,
-			Description: "The course name extracted from the pdf.",
+			Description: "The full descriptive name of the course, excluding the course code (e.g., 'Introduction to Computer Science' rather than 'CS101 Intro').",
+		},
+		"course_abbr": {
+			Type:        genai.TypeString,
+			Description: "The course abbreviation and number. If multiple are present, provide the primary one associated with the main syllabus. Example: 'BIO101'.",
 		},
 		"assignments": {
 			Type:        genai.TypeArray,
-			Description: "A list of all critical assignments, midterms, finals, and readings.",
+			Description: "A comprehensive list of graded deliverables, exams, and key deadlines extracted from the course schedule or syllabus.",
 			Items: &genai.Schema{
 				Type: genai.TypeObject,
 				Properties: map[string]*genai.Schema{
 					"title": {
 						Type:        genai.TypeString,
-						Description: "The name of the assignment, exam, or deliverable",
+						Description: "The specific name of the task (e.g., 'Midterm Exam', 'Problem Set 1'). Do not include the date in the title.",
 					},
 					"dueDate": {
 						Type:        genai.TypeString,
-						Description: "The exact due date, e.g., 'Oct 20' or 'Every Friday'",
+						Description: "The deadline exactly as written. If a specific year isn't mentioned, assume the current academic year. Use 'TBD' if the date is not listed.",
 					},
 					"weight": {
 						Type:        genai.TypeString,
-						Description: "The percentage of the total grade, e.g., '15%'. Use 'N/A' if unknown.",
+						Description: "The grade contribution (e.g., '20%'). If the syllabus provides points instead of percentages, include the point value (e.g., '50 pts').",
 					},
 				},
 				Required: []string{"title", "dueDate", "weight"},
 			},
 		},
 	},
-	Required: []string{"course_title", "important_dates"},
+	Required: []string{"course_title", "course_abbr", "important_dates"},
 }
 
 func create_gemini_client() (*genai.Client, error) {
@@ -66,7 +62,7 @@ func create_gemini_client() (*genai.Client, error) {
 
 var model = "gemini-2.5-flash"
 
-func Extract_courses(pdf *[]byte) (*Syllabus, error) {
+func Extract_syllabus(pdf *[]byte) (*da_types.Syllabus, error) {
 	gem_client, err := create_gemini_client()
 	if err != nil {
 		fmt.Errorf("Genai Client creation error %v\n", err)
@@ -106,7 +102,7 @@ func Extract_courses(pdf *[]byte) (*Syllabus, error) {
 
 	json_string := string(response.Candidates[0].Content.Parts[0].Text)
 
-	var syllabus Syllabus
+	var syllabus da_types.Syllabus
 	json.Unmarshal([]byte(json_string), &syllabus)
 	return &syllabus, nil
 }
