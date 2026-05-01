@@ -283,7 +283,6 @@ func Serve_login(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "failed to render template", http.StatusInternalServerError)
 	}
-
 }
 
 func Serve_signup(w http.ResponseWriter, r *http.Request) {

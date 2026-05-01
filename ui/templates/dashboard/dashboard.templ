@@ -12,6 +12,8 @@ templ layout() {
 			<title>College Assist Dashboard</title>
 			<link rel="stylesheet" href="../css/dashboard_styles.css"/>
 			<script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@v1.0.0/bundles/datastar.js"></script>
+			<script src="../scripts/file_upload.js"></script>
+			<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 		</head>
 		<body>
 			<div class="app-shell">
@@ -42,8 +44,6 @@ templ layout() {
 					{ children... }
 				</main>
 			</div>
-			<script src="../scripts/file_upload.js"></script>
-			<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 		</body>
 	</html>
 }
@@ -131,8 +131,8 @@ templ get_curr_course_quizzes(course *da_types.Course) {
 	if quiz_length != 0 {
 		for _, quiz := range quizzes {
 			<div class="quiz">
-				<span class="quiz-title">{quiz.Title}</span>
-                data-on:click={ fmt.Sprintf("@get('/get_quiz/{%s}')", quiz.Title) }
+				<span class="quiz-title">{ quiz.Title }</span>
+				data-on:click={ fmt.Sprintf("@get('/get_quiz/{%s}')", quiz.Title) }
 			</div>
 		}
 	} else {
