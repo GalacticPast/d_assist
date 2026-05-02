@@ -17,6 +17,21 @@ if (syllabus_upload_btn && syllabus_pdf_file_input) {
   });
 }
 
+const slides_pdf_file_input = document.getElementById("slides-upload");
+const slides_upload_btn = document.getElementById("slides-upload-btn");
+
+if (slides_upload_btn && slides_pdf_file_input) {
+  slides_upload_btn.addEventListener("click", () => {
+    syllabus_pdf_file_input.click();
+  });
+  slides_pdf_file_input.addEventListener("change", (e) => {
+    if (slides_pdf_file_input.files.length > 0) {
+      upload_file("slides-upload-btn", slides_pdf_file_input.files[0]);
+      syllabus_pdf_file_input.value = "";
+    }
+  });
+}
+
 if (dropzone) {
   ["dragenter", "dragover"].forEach((eventName) => {
     dropzone.addEventListener(eventName, (e) => {

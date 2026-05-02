@@ -28,8 +28,8 @@ templ layout() {
 							<span class="brand-text">College Assist</span>
 						</a>
 						<nav class="main-nav">
-							<a href="/dashboard" class="active">Dashboard</a>
-							<a href="/courses">Courses</a>
+							<a href="/dashboard" class="active">Courses</a>
+							<a href="/courses">Calendar</a>
 						</nav>
 					</div>
 					<div class="header-right">
@@ -138,10 +138,11 @@ templ get_curr_course_quizzes(course *da_types.Course) {
 	} else {
 		<article class="task-card">
 			<div class="task-info">
-				<div class="task-details">
-					<h3 class="task-name">Upload class slides to generate content</h3>
+                <inpu5     if (slides_pdf_file_input.files.length > 0) {                                  │  5            </div>upload_filet type="file" accept="application/pdf" class="file-input" id="slides-upload" hidden/>
+				<div class="slide-upload-btn">
+					<h3 class="task-name">Click here to upload class slides to generate content</h3>
 				</div>
 			</div>
 		</article>
-	}
-}
+	}upload_file
+}upload_file

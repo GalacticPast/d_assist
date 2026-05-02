@@ -220,10 +220,13 @@ a {
   display: flex;
   flex-direction: column;
   gap: 2.5rem;
-
   #courses-tab-container {
+
     display: flex;
+    flex-direction: row;
     gap: 1.2rem;
+    padding: 25px;
+    min-height: 30px;
     overflow-x: auto;
     padding-bottom: 1.5rem;
     scrollbar-width: thin;
@@ -251,7 +254,6 @@ a {
       font-size: 1.05rem;
       cursor: pointer;
       backdrop-filter: var(--glass-blur);
-      box-shadow: var(--card-shadow);
       transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
       white-space: nowrap;
 
@@ -266,9 +268,7 @@ a {
 
       &:hover {
         background: #ffffff;
-        color: var(--primary-color);
         transform: translateY(-4px);
-        box-shadow: var(--card-shadow-hover);
         border-color: #ffffff;
 
         .tab-icon {
@@ -279,9 +279,7 @@ a {
       &.active {
         background: var(--primary-gradient);
         color: #ffffff;
-        border-color: transparent;
-        box-shadow: 0 10px 25px rgba(255, 143, 171, 0.4);
-
+        border-color: var(--primary-color);
         .tab-icon {
           stroke: #ffffff;
         }
@@ -422,3 +420,4 @@ a {
     padding: 2rem 1rem;
   }
 }
+
