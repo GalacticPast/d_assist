@@ -12,7 +12,6 @@ templ layout() {
 			<title>College Assist Dashboard</title>
 			<link rel="stylesheet" href="../css/dashboard_styles.css"/>
 			<script type="module" src="https://cdn.jsdelivr.net/gh/starfederation/datastar@v1.0.0/bundles/datastar.js"></script>
-			<script src="../scripts/file_upload.js"></script>
 			<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 		</head>
 		<body>
@@ -40,12 +39,13 @@ templ layout() {
 					</div>
 				</header>
 				<input type="text" id="is_uploading" data-bind:is_uploading style="display: none"/>
-				<input drop_type="file" accept="application/pdf" class="file-input" id="Syllabus-upload" hidden/>
-				<input drop_type="file" accept="application/pdf" class="file-input" id="Slides-upload" hidden/>
+				<input type="file" accept="application/pdf" class="file-input" id="Syllabus-upload" hidden/>
+				<input type="file" accept="application/pdf" class="file-input" id="Slides-upload" hidden/>
 				<main class="main-content">
 					{ children... }
 				</main>
 			</div>
+			<script src="../scripts/file_upload.js"></script>
 		</body>
 	</html>
 }

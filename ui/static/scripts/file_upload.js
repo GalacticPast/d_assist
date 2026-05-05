@@ -18,6 +18,8 @@ if (syllabus_upload_btn && syllabus_pdf_file_input) {
       syllabus_pdf_file_input.value = "";
     }
   });
+} else {
+  console.log("wtf");
 }
 
 if (slides_upload_btn && slides_pdf_file_input) {
@@ -30,6 +32,8 @@ if (slides_upload_btn && slides_pdf_file_input) {
       slides_pdf_file_input.value = "";
     }
   });
+} else {
+  console.log("wtf");
 }
 
 if (dropzone) {
