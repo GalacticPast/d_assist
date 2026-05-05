@@ -2,8 +2,11 @@ const dropzone = document.getElementById("dropzone");
 const statusText = document.getElementById("status-text");
 
 const file_inputs = document.querySelectorAll(".file-input");
-const syllabus_pdf_file_input = document.getElementById("syllabus-upload");
-const syllabus_upload_btn = document.getElementById("syllabus-upload-btn");
+const syllabus_pdf_file_input = document.getElementById("Syllabus-upload");
+const syllabus_upload_btn = document.getElementById("Syllabus-upload-btn");
+
+const slides_pdf_file_input = document.getElementById("Slides-upload");
+const slides_upload_btn = document.getElementById("Slides-upload-btn");
 
 if (syllabus_upload_btn && syllabus_pdf_file_input) {
   syllabus_upload_btn.addEventListener("click", () => {
@@ -17,17 +20,14 @@ if (syllabus_upload_btn && syllabus_pdf_file_input) {
   });
 }
 
-const slides_pdf_file_input = document.getElementById("slides-upload");
-const slides_upload_btn = document.getElementById("slides-upload-btn");
-
 if (slides_upload_btn && slides_pdf_file_input) {
   slides_upload_btn.addEventListener("click", () => {
-    syllabus_pdf_file_input.click();
+    slides_pdf_file_input.click();
   });
   slides_pdf_file_input.addEventListener("change", (e) => {
     if (slides_pdf_file_input.files.length > 0) {
       upload_file("slides-upload-btn", slides_pdf_file_input.files[0]);
-      syllabus_pdf_file_input.value = "";
+      slides_pdf_file_input.value = "";
     }
   });
 }

@@ -40,6 +40,8 @@ templ layout() {
 					</div>
 				</header>
 				<input type="text" id="is_uploading" data-bind:is_uploading style="display: none"/>
+				<input drop_type="file" accept="application/pdf" class="file-input" id="Syllabus-upload" hidden/>
+				<input drop_type="file" accept="application/pdf" class="file-input" id="Slides-upload" hidden/>
 				<main class="main-content">
 					{ children... }
 				</main>
@@ -62,20 +64,7 @@ templ Setup(curr_selected_course int, courses *[]da_types.Course) {
 					Start uploading syllabi to get
 					<span class="text-gradient">Started</span>
 				</h1>
-				<div id="dropzone">
-					<div id="icon-container">
-						<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-							<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-							<polyline points="14 2 14 8 20 8"></polyline>
-							<line x1="12" y1="18" x2="12" y2="12"></line>
-							<polyline points="9 15 12 12 15 15"></polyline>
-						</svg>
-					</div>
-					<h2>Drag & drop your syllabus PDF</h2>
-					<p>or click to browse from your computer</p>
-					<input type="file" accept="application/pdf" class="file-input" id="syllabus-upload" hidden/>
-					<button class="select-btn" id="syllabus-upload-btn">Upload Syllabus</button>
-				</div>
+				@get_dropzone("Syllabus")
 			</div>
 		} else {
 			@Show_courses_content(curr_selected_course, courses)
@@ -91,16 +80,14 @@ templ Show_spinner() {
 }
 
 templ Show_courses_content(curr_selected_course int, courses *[]da_types.Course) {
-	<main>
-		<section id="courses">
-			<div id="courses-tab-container">
-				@get_course_sections(curr_selected_course, courses)
-			</div>
-			<div id="course-quizzes">
-				@get_curr_course_quizzes(&(*courses)[curr_selected_course])
-			</div>
-		</section>
-	</main>
+	<section id="courses">
+		<div id="courses-tab-container">
+			@get_course_sections(curr_selected_course, courses)
+		</div>
+		<div id="course-quizzes">
+			@get_curr_course_quizzes(&(*courses)[curr_selected_course])
+		</div>
+	</section>
 }
 
 templ get_course_sections(curr_selected_course int, courses *[]da_types.Course) {
@@ -136,13 +123,22 @@ templ get_curr_course_quizzes(course *da_types.Course) {
 			</div>
 		}
 	} else {
-		<article class="task-card">
-			<div class="task-info">
-                <inpu5     if (slides_pdf_file_input.files.length > 0) {                                  │  5            </div>upload_filet type="file" accept="application/pdf" class="file-input" id="slides-upload" hidden/>
-				<div class="slide-upload-btn">
-					<h3 class="task-name">Click here to upload class slides to generate content</h3>
-				</div>
-			</div>
-		</article>
-	}upload_file
-}upload_file
+		@get_dropzone("Slides")
+	}
+}
+
+templ get_dropzone(drop_type string) {
+	<div id="dropzone">
+		<div id="icon-container">
+			<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+				<polyline points="14 2 14 8 20 8"></polyline>
+				<line x1="12" y1="18" x2="12" y2="12"></line>
+				<polyline points="9 15 12 12 15 15"></polyline>
+			</svg>
+		</div>
+		<h2>Drag & drop your { drop_type }</h2>
+		<p>or click to browse from your computer</p>
+		<button class="btn" id={ drop_type + "-upload-btn" }>Upload { drop_type }</button>
+	</div>
+}
