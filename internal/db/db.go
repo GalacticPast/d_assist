@@ -170,13 +170,15 @@ func Get_courses(user_id string) (*[]da_types.Course, error) {
 	return &courses, nil
 }
 
-var bucket_name = "syllabus_pdf"
-
-func Get_signed_upload_url(file_path string) string {
+func Get_signed_upload_url(button_id string, file_path string) string {
 	supabase_client, err := Create_supabase_client(da_types.SUPABASE_ADMIN_CLIENT)
 	if err != nil {
 		log.Printf("Failed to initalize the client: %v\n", err)
 		return ""
+	}
+	bucket_name := "slides_pdf"
+	if button_id == "Syllabus-upload-btn" {
+		bucket_name = "syllabus_pdf"
 	}
 	resp, err := supabase_client.Storage.CreateSignedUploadUrl(bucket_name, file_path)
 	if err != nil {
@@ -187,13 +189,17 @@ func Get_signed_upload_url(file_path string) string {
 	return resp.Url
 }
 
-func Get_pdf_from_bucket(file_name string) ([]byte, error) {
+func Get_pdf_from_bucket(button_id string, file_name string) ([]byte, error) {
 	supabase_client, err := Create_supabase_client(da_types.SUPABASE_ADMIN_CLIENT)
 	if err != nil {
 		log.Printf("Failed to initalize the client: %v\n", err)
 		return nil, err
 	}
-	pdf_bytes, err := supabase_client.Storage.DownloadFile("syllabus_pdf", file_name)
+	bucket_name := "slides_pdf"
+	if button_id == "Syllabus-upload-btn" {
+		bucket_name = "syllabus_pdf"
+	}
+	pdf_bytes, err := supabase_client.Storage.DownloadFile(bucket_name, file_name)
 	if err != nil {
 		fmt.Println(err.Error())
 
@@ -201,6 +207,51 @@ func Get_pdf_from_bucket(file_name string) ([]byte, error) {
 		return nil, err
 	}
 	return pdf_bytes, nil
+}
+
+func Insert_new_deck(user_id string, deck *da_types.Deck) error {
+	supabase_client, err := Create_supabase_client(da_types.SUPABASE_ADMIN_CLIENT)
+	if err != nil {
+		log.Printf("Failed to initalize the client: %v\n", err)
+		return err
+	}
+
+	var deck_result []map[string]interface{}
+
+	_, err = supabase_client.From("decks").Insert(map[string]interface{}{
+		"user_id": user_id,
+		"name":    deck.Title,
+	}, false, "", "", "").ExecuteTo(&deck_result)
+
+	if err != nil {
+		return fmt.Errorf("failed to insert course: %w", err)
+	}
+
+	if len(deck_result) == 0 {
+		return fmt.Errorf("course inserted but no ID was returned")
+	}
+	course_id := deck_result[0]["id"].(string)
+
+	var batch_cards []map[string]interface{}
+
+	for _, a := range deck.Cards {
+		batch_cards = append(batch_cards, map[string]interface{}{
+			"course_id":   course_id, // Links to the parent course
+			"question":    a.Question,
+			"options":     a.Options,
+			"awnser":      a.Correct_option,
+			"explanation": a.Explanation,
+		})
+	}
+
+	// 4. Execute the Batch Insert
+	// Passing the slice of maps automatically triggers a multi-row INSERT in Supabase
+	_, _, err = supabase_client.From("cards").Insert(batch_cards, false, "", "", "").Execute()
+	if err != nil {
+		fmt.Printf("%v\n", err)
+	}
+	log.Printf("Successfully inserted course and %d assignments.", len(batch_cards))
+	return nil
 }
 
 func Insert_new_syllabus(user_id string, syllabus *da_types.Syllabus) error {

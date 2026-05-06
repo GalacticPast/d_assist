@@ -64,7 +64,7 @@ templ Setup(curr_selected_course int, courses *[]da_types.Course) {
 					Start uploading syllabi to get
 					<span class="text-gradient">Started</span>
 				</h1>
-				@get_dropzone("Syllabus")
+				@get_dropzone("Syllabus", "")
 			</div>
 		} else {
 			@Show_courses_content(curr_selected_course, courses)
@@ -85,7 +85,7 @@ templ Show_courses_content(curr_selected_course int, courses *[]da_types.Course)
 			@get_course_sections(curr_selected_course, courses)
 		</div>
 		<div id="course-quizzes">
-			@get_curr_course_quizzes(&(*courses)[curr_selected_course])
+			@get_curr_course_decks(&(*courses)[curr_selected_course])
 		</div>
 	</section>
 }
@@ -110,24 +110,24 @@ templ get_curr_course_badge(course *da_types.Course) {
 	</div>
 }
 
-templ get_curr_course_quizzes(course *da_types.Course) {
+templ get_curr_course_decks(course *da_types.Course) {
 	{{
-		quizzes := course.Quizzes
-		quiz_length := len(quizzes)
+		decks := course.Decks
+		quiz_length := len(decks)
 	}}
 	if quiz_length != 0 {
-		for _, quiz := range quizzes {
+		for _, quiz := range decks {
 			<div class="quiz">
 				<span class="quiz-title">{ quiz.Title }</span>
 				data-on:click={ fmt.Sprintf("@get('/get_quiz/{%s}')", quiz.Title) }
 			</div>
 		}
 	} else {
-		@get_dropzone("Slides")
+		@get_dropzone("Slides", course.Badge)
 	}
 }
 
-templ get_dropzone(drop_type string) {
+templ get_dropzone(drop_type string, badge string) {
 	<div id="dropzone">
 		<div id="icon-container">
 			<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -137,8 +137,9 @@ templ get_dropzone(drop_type string) {
 				<polyline points="9 15 12 12 15 15"></polyline>
 			</svg>
 		</div>
-		<h2>Drag & drop your { drop_type }</h2>
+		<h2>Drag & drop your { drop_type } "for" { badge }</h2>
 		<p>or click to browse from your computer</p>
+		<div class="badge" id={ badge }></div>
 		<button class="btn" id={ drop_type + "-upload-btn" }>Upload { drop_type }</button>
 	</div>
 }

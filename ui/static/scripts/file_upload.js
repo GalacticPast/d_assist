@@ -2,6 +2,7 @@ const dropzone = document.getElementById("dropzone");
 const statusText = document.getElementById("status-text");
 
 const file_inputs = document.querySelectorAll(".file-input");
+const badges = document.querySelectorAll(".badge");
 const syllabus_pdf_file_input = document.getElementById("Syllabus-upload");
 const syllabus_upload_btn = document.getElementById("Syllabus-upload-btn");
 
@@ -97,7 +98,7 @@ async function upload_file(button_id, file) {
     const token_from_signed_upload_url = url_obj.searchParams.get("token");
 
     const bucketName =
-      button_id === "syllabus-upload-btn" ? "syllabus_pdf" : "class_slides";
+      button_id === "syllabus-upload-btn" ? "syllabus_pdf" : "slides_pdf";
 
     const { data: upload_data, error: upload_error } =
       await supabase_client.storage
@@ -110,9 +111,11 @@ async function upload_file(button_id, file) {
     // i think this is counter to the tao of datastar. Im too stupid to make this work
     // well actually I think I can make it work now
     // oh well
+    let badge = badges[0].id;
     const upload_finished = new URL("/upload_finished", window.location.origin);
     upload_finished.searchParams.append("button_id", button_id);
     upload_finished.searchParams.append("file_path", `${rand_file_path}`);
+    upload_finished.searchParams.append("badge", `${badge}`);
     response = await fetch(upload_finished);
   } catch (err) {
     alert(`Error: ${err.message}`);

@@ -28,12 +28,14 @@ func Process_upload(w http.ResponseWriter, r *http.Request) {
 
 func Get_signed_upload_url(w http.ResponseWriter, r *http.Request) {
 	file_path := r.FormValue("file_path")
+	button_id := r.FormValue("button_id")
+
 	if file_path == "" {
 		http.Error(w, "File path is empty", http.StatusBadRequest)
 		return
 	}
 	rand_file_path := rand.Text() + file_path
-	signed_url := db.Get_signed_upload_url(rand_file_path)
+	signed_url := db.Get_signed_upload_url(button_id, rand_file_path)
 	response := Signed_url{
 		File_name: rand_file_path,
 		URL:       signed_url,
@@ -50,7 +52,7 @@ func Upload_finished(w http.ResponseWriter, r *http.Request) {
 	claims := auth.Get_claims_from_cookie(r)
 	user_id := auth.Get_user_id_from_claims(&claims)
 
-	pdf_bytes, err := db.Get_pdf_from_bucket(file_name)
+	pdf_bytes, err := db.Get_pdf_from_bucket(button_id, file_name)
 	if err != nil {
 		fmt.Errorf("Something wrong with pdf download %v\n", err)
 		fmt.Println(err.Error())
@@ -74,10 +76,24 @@ func Upload_finished(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-	} else if button_id == "class_slides" {
-		err = fmt.Errorf("We dont currently support pdf slides")
-		fmt.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	} else if button_id == "slides-upload-btn" {
+		badge := r.FormValue("badge")
+		deck, err := gemini.Extract_slides(badge, &pdf_bytes)
+		if err != nil {
+			err = fmt.Errorf("Something wrong with gemini AI: %v\n", err)
+			fmt.Println(err.Error())
+
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		err = db.Insert_new_deck(user_id, deck)
+		if err != nil {
+			err = fmt.Errorf("Something wrong with supabase: %v\n", err)
+			fmt.Println(err.Error())
+
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	}
 }
 

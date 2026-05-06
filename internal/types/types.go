@@ -28,21 +28,31 @@ type Task struct {
 }
 
 type Course struct {
-	Title   string `db:"name"`
-	Color   string `db:"color"`
-	Badge   string `db:"code"`
-	Tasks   []Task `db:"-"`
-	Quizzes []Quiz `db:"-"`
+	Title string `db:"name"`
+	Color string `db:"color"`
+	Badge string `db:"code"`
+	Tasks []Task `db:"-"`
+	Decks []Deck `db:"-"`
 }
 
 type Syllabus struct {
+	Status       string       `json:"status"`
 	Course_title string       `json:"course_title"`
 	Course_abbr  string       `json:"course_abbr"`
 	Assignments  []Assignment `json:"assignments"`
 }
-type Quiz struct {
-	Quiz_id string `db:"quiz_id"`
-	Title   string `db:"quiz_title"`
+
+type Card struct {
+	Question       string   `json:"question"`
+	Options        []string `json:"options"`
+	Correct_option int      `json:"correct_option"`
+	Explanation    string   `json:"explanation"`
+}
+
+type Deck struct {
+	Title  string `json:"title"`
+	Status string `json:"status"`
+	Cards  []Card `json:"cards"`
 }
 
 type Assignment struct {
