@@ -111,11 +111,11 @@ async function upload_file(button_id, file) {
     // i think this is counter to the tao of datastar. Im too stupid to make this work
     // well actually I think I can make it work now
     // oh well
-    let badge = badges[0].id;
+    let uuid = badges[0].id;
     const upload_finished = new URL("/upload_finished", window.location.origin);
     upload_finished.searchParams.append("button_id", button_id);
     upload_finished.searchParams.append("file_path", `${rand_file_path}`);
-    upload_finished.searchParams.append("badge", `${badge}`);
+    upload_finished.searchParams.append("id", `${uuid}`);
     response = await fetch(upload_finished);
   } catch (err) {
     alert(`Error: ${err.message}`);

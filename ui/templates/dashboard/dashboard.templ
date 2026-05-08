@@ -40,7 +40,6 @@ templ layout() {
 				</header>
 				<input type="text" id="is_uploading" data-bind:is_uploading style="display: none"/>
 				<input type="file" accept="application/pdf" class="file-input" id="Syllabus-upload" hidden/>
-				<input type="file" accept="application/pdf" class="file-input" id="Slides-upload" hidden/>
 				<main class="main-content">
 					{ children... }
 				</main>
@@ -64,7 +63,7 @@ templ Setup(curr_selected_course int, courses *[]da_types.Course) {
 					Start uploading syllabi to get
 					<span class="text-gradient">Started</span>
 				</h1>
-				@get_dropzone("Syllabus", "")
+				@get_dropzone("Syllabus", "", "")
 			</div>
 		} else {
 			@Show_courses_content(curr_selected_course, courses)
@@ -123,11 +122,11 @@ templ get_curr_course_decks(course *da_types.Course) {
 			</div>
 		}
 	} else {
-		@get_dropzone("Slides", course.Badge)
+		@get_dropzone("Slides", course.ID, course.Badge)
 	}
 }
 
-templ get_dropzone(drop_type string, badge string) {
+templ get_dropzone(drop_type string, id string, badge string) {
 	<div id="dropzone">
 		<div id="icon-container">
 			<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -137,9 +136,9 @@ templ get_dropzone(drop_type string, badge string) {
 				<polyline points="9 15 12 12 15 15"></polyline>
 			</svg>
 		</div>
-		<h2>Drag & drop your { drop_type } "for" { badge }</h2>
+		<h2>{ "Drag & drop your " +  drop_type  + " for " +  badge }</h2>
 		<p>or click to browse from your computer</p>
-		<div class="badge" id={ badge }></div>
+		<div class="badge" id={ id }></div>
 		<button class="btn" id={ drop_type + "-upload-btn" }>Upload { drop_type }</button>
 	</div>
 }

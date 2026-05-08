@@ -209,7 +209,7 @@ func Get_pdf_from_bucket(button_id string, file_name string) ([]byte, error) {
 	return pdf_bytes, nil
 }
 
-func Insert_new_deck(user_id string, deck *da_types.Deck) error {
+func Insert_new_deck(course_badge string, deck *da_types.Deck) error {
 	supabase_client, err := Create_supabase_client(da_types.SUPABASE_ADMIN_CLIENT)
 	if err != nil {
 		log.Printf("Failed to initalize the client: %v\n", err)
@@ -219,8 +219,8 @@ func Insert_new_deck(user_id string, deck *da_types.Deck) error {
 	var deck_result []map[string]interface{}
 
 	_, err = supabase_client.From("decks").Insert(map[string]interface{}{
-		"user_id": user_id,
-		"name":    deck.Title,
+		"course_id": user_id,
+		"title":     deck.Title,
 	}, false, "", "", "").ExecuteTo(&deck_result)
 
 	if err != nil {
@@ -230,13 +230,13 @@ func Insert_new_deck(user_id string, deck *da_types.Deck) error {
 	if len(deck_result) == 0 {
 		return fmt.Errorf("course inserted but no ID was returned")
 	}
-	course_id := deck_result[0]["id"].(string)
+	deck_id := deck_result[0]["id"].(string)
 
 	var batch_cards []map[string]interface{}
 
 	for _, a := range deck.Cards {
 		batch_cards = append(batch_cards, map[string]interface{}{
-			"course_id":   course_id, // Links to the parent course
+			"deck_id":     deck_id, // Links to the parent course
 			"question":    a.Question,
 			"options":     a.Options,
 			"awnser":      a.Correct_option,
