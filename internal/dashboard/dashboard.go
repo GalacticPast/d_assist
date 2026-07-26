@@ -77,7 +77,7 @@ func Upload_finished(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else if button_id == "slides-upload-btn" {
-		id := r.FormValue("id")
+		//id := r.FormValue("id")
 		badge := r.FormValue("badge")
 		deck, err := gemini.Extract_slides(badge, &pdf_bytes)
 		if err != nil {
@@ -87,7 +87,7 @@ func Upload_finished(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		err = db.Insert_new_deck(badge, deck)
+		err = db.Insert_new_deck(user_id, badge, deck)
 		if err != nil {
 			err = fmt.Errorf("Something wrong with supabase: %v\n", err)
 			fmt.Println(err.Error())

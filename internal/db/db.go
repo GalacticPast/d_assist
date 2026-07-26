@@ -209,7 +209,7 @@ func Get_pdf_from_bucket(button_id string, file_name string) ([]byte, error) {
 	return pdf_bytes, nil
 }
 
-func Insert_new_deck(course_badge string, deck *da_types.Deck) error {
+func Insert_new_deck(user_id string, course_badge string, deck *da_types.Deck) error {
 	supabase_client, err := Create_supabase_client(da_types.SUPABASE_ADMIN_CLIENT)
 	if err != nil {
 		log.Printf("Failed to initalize the client: %v\n", err)
@@ -244,8 +244,6 @@ func Insert_new_deck(course_badge string, deck *da_types.Deck) error {
 		})
 	}
 
-	// 4. Execute the Batch Insert
-	// Passing the slice of maps automatically triggers a multi-row INSERT in Supabase
 	_, _, err = supabase_client.From("cards").Insert(batch_cards, false, "", "", "").Execute()
 	if err != nil {
 		fmt.Printf("%v\n", err)
