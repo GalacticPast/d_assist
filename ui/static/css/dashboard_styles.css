@@ -177,6 +177,7 @@ a {
   font-weight: 700;
   cursor: pointer;
   display: flex;
+  justify-self: center;
   align-items: center;
   gap: 0.6rem;
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -208,12 +209,37 @@ a {
 
 /* Main Content */
 .main-content {
-  flex: 1;
-  padding: 0.5px 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
+  min-height: calc(100vh - 120px); 
+  
+  padding: 0.5rem 2rem; 
   max-width: 1100px;
   margin: 0 auto;
   width: 100%;
 }
+
+#empty-dashboard {
+  background-color: var(--card-bg); /* Replaced red with your loader styling */
+  border-radius: 16px;
+  padding: 70px 20px;
+  text-align: center;
+  color: var(--text-primary);
+  
+  width: 100%;
+  max-width: 800px; 
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 30px; 
+  
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
 /* Courses Section */
 #courses {
   display: flex;
@@ -287,6 +313,7 @@ a {
   }
 }
 
+
 /* Tasks / Quizzes Cards */
 #course-quizzes {
   display: flex;
@@ -357,19 +384,6 @@ a {
       margin-bottom: 0.5rem;
   }
 
-  #loader-container {
-      background-color: #121318;
-      border: 1px dashed #2b2d35;
-      border-radius: 16px;
-      padding: 70px 20px;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      transition: border-color 0.2s ease, background-color 0.2s ease;
-      color: #ffffff;
-      /* Added so you can see the text */
-  }
 
   #dropzone {
       background-color: var(--card-bg);
@@ -415,7 +429,7 @@ a {
           font-size: 15px;
           margin-bottom: 32px;
       }
-
+        
   }
 
 }
@@ -481,3 +495,4 @@ a {
       left: 3.5em;
   }
 }
+
