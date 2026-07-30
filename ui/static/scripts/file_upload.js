@@ -15,7 +15,7 @@ if (syllabus_upload_btn && syllabus_pdf_file_input) {
   });
   syllabus_pdf_file_input.addEventListener("change", (e) => {
     if (syllabus_pdf_file_input.files.length > 0) {
-      upload_file("syllabus-upload-btn", syllabus_pdf_file_input.files[0]);
+      upload_file("Syllabus-upload-btn", syllabus_pdf_file_input.files[0]);
       syllabus_pdf_file_input.value = "";
     }
   });
@@ -98,7 +98,7 @@ async function upload_file(button_id, file) {
     const token_from_signed_upload_url = url_obj.searchParams.get("token");
 
     const bucketName =
-      button_id === "syllabus-upload-btn" ? "syllabus_pdf" : "slides_pdf";
+      button_id === "Syllabus-upload-btn" ? "syllabus_pdf" : "slides_pdf";
 
     const { data: upload_data, error: upload_error } =
       await supabase_client.storage
