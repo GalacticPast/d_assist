@@ -29,7 +29,7 @@ if (slides_upload_btn && slides_pdf_file_input) {
   });
   slides_pdf_file_input.addEventListener("change", (e) => {
     if (slides_pdf_file_input.files.length > 0) {
-      upload_file("slides-upload-btn", slides_pdf_file_input.files[0]);
+      upload_file("Slides-upload-btn", slides_pdf_file_input.files[0]);
       slides_pdf_file_input.value = "";
     }
   });

@@ -153,7 +153,7 @@ func Get_courses(user_id string) (*[]da_types.Course, error) {
 	}
 	defer conn.Close(context.Background())
 
-	query := "SELECT name, code, color FROM courses WHERE user_id = (@user_id)"
+	query := "SELECT id, name, code, color FROM courses WHERE user_id = (@user_id)"
 
 	args := pgx.NamedArgs{"user_id": user_id}
 

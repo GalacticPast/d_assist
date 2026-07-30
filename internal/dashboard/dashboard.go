@@ -59,7 +59,7 @@ func Upload_finished(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
-	if button_id == "syllabus-upload-btn" {
+	if button_id == "Syllabus-upload-btn" {
 		syllabus, err := gemini.Extract_syllabus(&pdf_bytes)
 		if err != nil {
 			err = fmt.Errorf("Something wrong with gemini AI: %v\n", err)
@@ -76,7 +76,7 @@ func Upload_finished(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-	} else if button_id == "slides-upload-btn" {
+	} else if button_id == "Slides-upload-btn" {
 		//id := r.FormValue("id")
 		badge := r.FormValue("badge")
 		deck, err := gemini.Extract_slides(badge, &pdf_bytes)
@@ -95,6 +95,10 @@ func Upload_finished(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+	} else {
+		err = fmt.Errorf("Something wrong with the upload\n", err)
+		fmt.Println(err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 

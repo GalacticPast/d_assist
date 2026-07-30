@@ -28,7 +28,7 @@ type Task struct {
 }
 
 type Course struct {
-	ID    string `db:"uuid"`
+	ID    string `db:"id"`
 	Title string `db:"name"`
 	Color string `db:"color"`
 	Badge string `db:"code"`
