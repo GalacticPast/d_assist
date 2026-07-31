@@ -49,8 +49,12 @@ templ layout() {
 	</html>
 }
 
+templ Setup_calendar(curr_selected_course int, syllabus *[]da_types.Syllabus) {
+
+}
+
 // this is kinda shit
-templ Setup(curr_selected_course int, courses *[]da_types.Course) {
+templ Setup_courses(curr_selected_course int, courses *[]da_types.Course) {
 	{{ course_count := len(*courses) }}
 	@layout() {
 		<div id="loader-container" data-show="$is_uploading == 'show_spinner'" style="display: none">

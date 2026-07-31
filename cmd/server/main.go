@@ -34,7 +34,8 @@ func main() {
 	http.HandleFunc("/loading", loading)
 
 	// page specific
-	http.Handle("/dashboard/", middleware.Verify_cookie(http.HandlerFunc(dashboard.Serve)))
+	http.Handle("/dashboard/courses/", middleware.Verify_cookie(http.HandlerFunc(dashboard.Serve_courses)))
+	http.Handle("/dashboard/calendar/", middleware.Verify_cookie(http.HandlerFunc(dashboard.Serve_calendar)))
 	http.Handle("/login/", http.HandlerFunc(auth.Serve_login))
 	http.Handle("/signup/", http.HandlerFunc(auth.Serve_signup))
 	http.Handle("/homepage/", http.HandlerFunc(homepage.Serve))
